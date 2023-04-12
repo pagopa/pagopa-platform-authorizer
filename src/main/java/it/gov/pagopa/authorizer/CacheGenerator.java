@@ -1,41 +1,38 @@
-package it.gov.pagopa.project;
+package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
+import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import jakarta.ws.rs.core.MediaType;
 
-import javax.ws.rs.core.MediaType;
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Azure Functions with Azure Queue trigger.
- */
-public class Example {
+public class CacheGenerator {
 
-    /**
-     * This function will be invoked when a Http Trigger occurs
-     */
-    @FunctionName("ExampleFunction")
+
+
+
+    @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
             @HttpTrigger(
-                    name = "ExampleTrigger",
+                    name = "CacheGeneratorTrigger",
                     methods = {HttpMethod.GET},
-                    route = "example",
+                    route = "/cache-generation/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
+            @BindingName("domain") String domain,
             final ExecutionContext context) {
 
         Logger logger = context.getLogger();
 
-        String message = String.format("it.gov.pagopa.project.Example function called at: %s", LocalDateTime.now());
-        logger.log(Level.INFO, () -> message);
+        // retrieve SubscriptionKeyDomain objects from DB by domain
+        // for each retrieved object, create an object that contains domains_subkey and authorized entity and execute an HTTP POST call on APIM_REFRESH_CONFIGURATION_PATH
 
         return request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", MediaType.TEXT_PLAIN)
-                .body(message)
+                .body("")
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package it.gov.pagopa.project;
+package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ExampleTest {
+class CacheFunctionNotifierTest {
 
     @Spy
-    Example function;
+    CacheGenerator function;
 
     @Mock
     ExecutionContext context;
@@ -43,7 +43,7 @@ class ExampleTest {
         doReturn(responseMock).when(builder).build();
 
         // test execution
-        HttpResponseMessage response = function.run(request, context);
+        HttpResponseMessage response = function.run(request, "domain", context);
 
         // test assertion
         assertEquals(HttpStatus.OK, response.getStatus());
