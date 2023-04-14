@@ -1,13 +1,22 @@
-package it.gov.pagopa.authorizer.model;
+package it.gov.pagopa.authorizer.entity;
 
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SubscriptionKeyDomain implements Serializable {
+
+    private String id;
+
     private String domain;
+
     private String subkey;
+
     private List<String> authorization;
 }
