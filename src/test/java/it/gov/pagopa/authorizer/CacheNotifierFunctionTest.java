@@ -1,20 +1,18 @@
 package it.gov.pagopa.authorizer;
 
-import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.HttpRequestMessage;
-import com.microsoft.azure.functions.HttpResponseMessage;
-import com.microsoft.azure.functions.HttpStatus;
+import com.microsoft.azure.functions.*;
+import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -22,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CacheGeneratorFunctionTest {
+class CacheNotifierFunctionTest {
 
     @Spy
-    CacheGenerator function;
+    CacheNotifier function;
 
     @Mock
     CacheService cacheService;
@@ -38,15 +36,13 @@ class CacheGeneratorFunctionTest {
     void runOk() {
 
         // Mocking service creation
-        final String MOCK_DOMAIN_PARAMETER = "mock_domain";
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
         when(function.getCacheService(any())).thenReturn(cacheService);
 
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-        ArgumentCaptor<String> domainInputCaptor = ArgumentCaptor.forClass(String.class);
-        doNothing().when(cacheService).addAuthConfigurationBulkToApimAuthorizer(domainInputCaptor.capture());
+        when(cacheService.addAuthConfigurationToAPIMAuthorizer(any())).thenReturn(mockedHttpResponse);
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
@@ -60,10 +56,15 @@ class CacheGeneratorFunctionTest {
         doReturn(responseMock).when(builder).build();
 
         // Execute function
-        HttpResponseMessage response = function.run(request, MOCK_DOMAIN_PARAMETER, context);
+        Optional<SubscriptionKeyDomain> subkeyDomain = Optional.of(SubscriptionKeyDomain.builder()
+                .id("casual-uuid")
+                .domain("domain")
+                .subkey("subkey")
+                .authorization(List.of("entity1", "entity2"))
+                .build());
+        HttpResponseMessage response = function.run(request, subkeyDomain, context);
 
         // Checking assertions
-        assertEquals(MOCK_DOMAIN_PARAMETER, domainInputCaptor.getValue());
         assertEquals(HttpStatus.OK, response.getStatus());
     }
 }
