@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <java.version>11</java.version>
         <azure.functions.maven.plugin.version>1.15.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
         <azure.cosmosdb.data.version>3.32.0</azure.cosmosdb.data.version>
@@ -128,7 +128,7 @@
                     <region>westus</region>
                     <runtime>
                         <os>windows</os>
-                        <javaVersion>17</javaVersion>
+                        <javaVersion>11</javaVersion>
                     </runtime>
                 </configuration>
                 <executions>
