@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 
 public class CacheService {
 
-    private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
+    private final String authorizerPath;
 
     private final Logger logger;
 
@@ -26,10 +26,15 @@ public class CacheService {
 
     private final DataAccessObject dao;
 
-    public CacheService(Logger logger, HttpClient httpClient, DataAccessObject dao) {
+    public CacheService(Logger logger, HttpClient httpClient, String authorizerPath) {
+        this(logger, httpClient, authorizerPath, null);
+    }
+
+    public CacheService(Logger logger, HttpClient httpClient, String authorizerPath, DataAccessObject dao) {
         this.logger = logger;
         this.httpClient = httpClient;
         this.dao = dao;
+        this.authorizerPath = authorizerPath;
     }
 
     public void addAuthConfigurationBulkToApimAuthorizer(String domain) throws InterruptedException {
@@ -37,11 +42,12 @@ public class CacheService {
             throw new IllegalArgumentException("Passed null parameter");
         }
         List<SubscriptionKeyDomain> subscriptionKeyDomains = this.dao.findAuthorizationByDomain(domain);
+        this.dao.close();
+        this.logger.log(Level.INFO, "Found {0} elements related to the domain [{1}]", new Object[] {subscriptionKeyDomains.size(), domain});
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
             HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain);
-            this.logger.log(Level.INFO, "Requested configuration to APIM for subscription key domain with id [{}]. Response status: {}", new Object[] {subkeyDomain.getId(), response.statusCode()});
+            this.logger.log(Level.INFO, "Requested configuration to APIM for subscription key domain with id [{0}]. Response status: {1}", new Object[] {subkeyDomain.getId(), response == null ? 500 : response.statusCode()});
         }
-        this.dao.close();
     }
 
     public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain) throws InterruptedException {
@@ -51,11 +57,11 @@ public class CacheService {
         HttpResponse<String> response = null;
         try {
             // generating object to be sent
-            this.logger.info(String.format("The record with id [%s] related to the subscription key associated to the domain %s has triggered the execution.", subkeyDomain.getId(), subkeyDomain.getDomain()));
             AuthConfiguration authConfiguration = AuthConfiguration.builder()
                     .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, subkeyDomain.getDomain(), subkeyDomain.getSubkey()))
                     .value(Utility.convertListToString(subkeyDomain.getAuthorization(), ","))
                     .build();
+            this.logger.log(Level.INFO, "The record with id [{0}] related to the subscription key associated to the domain [{1}] has triggered the execution. Will be added the following entities: [{2}]", new Object[] {subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()});
 
             // executing the request towards APIM Authorizer's API
             HttpRequest apimRequest = HttpRequest.newBuilder()
@@ -65,9 +71,7 @@ public class CacheService {
                     .build();
             response = this.httpClient.send(apimRequest, HttpResponse.BodyHandlers.ofString());
 
-        } catch (URISyntaxException e) {
-            this.logger.log(Level.SEVERE, String.format("An error occurred while trying to calling APIM's Authorizer API. Trying to invoke a wrong path for APIM's API [calling %s]", authorizerPath));
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);
         }
         return response;

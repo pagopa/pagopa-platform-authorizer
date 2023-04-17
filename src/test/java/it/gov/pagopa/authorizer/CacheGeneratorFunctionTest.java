@@ -5,6 +5,7 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
 import it.gov.pagopa.authorizer.service.CacheService;
+import it.gov.pagopa.authorizer.service.DataAccessObject;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class CacheGeneratorFunctionTest {
     void runOk() {
 
         // Mocking service creation
-        final String MOCK_DOMAIN_PARAMETER = "mock_domain";
+        final String mockDomainParameter = "mock_domain";
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
         when(function.getCacheService(any())).thenReturn(cacheService);
@@ -60,10 +61,10 @@ class CacheGeneratorFunctionTest {
         doReturn(responseMock).when(builder).build();
 
         // Execute function
-        HttpResponseMessage response = function.run(request, MOCK_DOMAIN_PARAMETER, context);
+        HttpResponseMessage response = function.run(request, mockDomainParameter, context);
 
         // Checking assertions
-        assertEquals(MOCK_DOMAIN_PARAMETER, domainInputCaptor.getValue());
+        assertEquals(mockDomainParameter, domainInputCaptor.getValue());
         assertEquals(HttpStatus.OK, response.getStatus());
     }
 }

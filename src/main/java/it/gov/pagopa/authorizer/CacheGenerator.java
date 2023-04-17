@@ -6,7 +6,6 @@ import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
 
 import java.net.http.HttpClient;
 import java.util.Optional;
@@ -14,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CacheGenerator {
+
+    private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
 
     @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
@@ -30,18 +31,12 @@ public class CacheGenerator {
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
                 .build();
-        logger.log(Level.INFO, "The execution will end with an HTTP status code {}", 200);
+        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", 200);
         return response;
     }
 
     public CacheService getCacheService(Logger logger) {
-        return new CacheService(logger,
-                HttpClient.newHttpClient(),
-                new DataAccessObject(System.getenv("SKEYDOMAINS_COSMOS_URI"),
-                        System.getenv("SKEYDOMAINS_COSMOS_KEY"),
-                        System.getenv("SKEYDOMAINS_COSMOS_DB"),
-                        System.getenv("SKEYDOMAINS_COSMOS_CONTAINER")
-                )
-        );
+        return new CacheService(logger, HttpClient.newHttpClient(), authorizerPath);
     }
+
 }
