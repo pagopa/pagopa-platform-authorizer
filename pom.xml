@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <azure.functions.maven.plugin.version>1.15.0</azure.functions.maven.plugin.version>
+        <azure.functions.maven.plugin.version>1.25.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
         <azure.cosmosdb.data.version>3.32.0</azure.cosmosdb.data.version>
         <functionAppName>com.microsoft.azure-20220215182005862</functionAppName>
