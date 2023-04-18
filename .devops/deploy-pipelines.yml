@@ -1,10 +1,3 @@
-# Only manual triggers
-trigger: none
-pr: none
-
-pool:
-  vmImage: 'ubuntu-22.04'
-
 parameters:
   - name: ENV
     displayName: Target Environment
@@ -24,6 +17,10 @@ parameters:
       - buildNumber
       - skip
     default: skip
+  - name: TEST
+    displayName: Run tests
+    type: boolean
+    default: false
   - name: "FORCE_REPLACE_DOCKER_IMAGE"
     displayName: "Force the existing docker image to be replaced"
     type: boolean
@@ -31,43 +28,53 @@ parameters:
     values:
       - False
       - True
-  - name: TEST
-    displayName: Run integration/smoke tests
-    type: boolean
-    default: true
 
 variables:
   imageRepository: '$(IMAGE_REPOSITORY_NAME)'
-  nameSpace: '$(K8S_NAMESPACE)'
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
+    AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
+    APP_NAME: $(DEV_WEB_APP_NAME)
+    STAGE: "d"
+    RESOURCE_GROUP: 'pagopa-d-weu-shared-rg'
     dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerRegistryFqdn: $(DEV_CONTAINER_NAMESPACE)
-    kubernetesServiceConnection: '$(DEV_KUBERNETES_SERVICE_CONN)'
-    poolImage: 'pagopa-dev-linux'
-    appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_DEV)"
-    appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_DEV)"
+    dockerNamespace: $(DEV_CONTAINER_NAMESPACE)
+
   ${{ if eq(parameters['ENV'], 'uat') }}:
+    AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
+    APP_NAME: $(UAT_WEB_APP_NAME)
+    STAGE: "u"
+    RESOURCE_GROUP: 'pagopa-u-weu-shared-rg'
     dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerRegistryFqdn: $(UAT_CONTAINER_NAMESPACE)
-    kubernetesServiceConnection: '$(UAT_KUBERNETES_SERVICE_CONN)'
-    poolImage: 'pagopa-uat-linux'
-    appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_UAT)"
-    appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_UAT)"
+    dockerNamespace: $(UAT_CONTAINER_NAMESPACE)
+
   ${{ if eq(parameters['ENV'], 'prod') }}:
+    AZURE_SUBSCRIPTION: $(PROD_AZURE_SUBSCRIPTION)
+    APP_NAME: $(PROD_WEB_APP_NAME)
+    STAGE: "p"
+    RESOURCE_GROUP: 'pagopa-p-weu-shared-rg'
     dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerRegistryFqdn: $(PROD_CONTAINER_NAMESPACE)
-    kubernetesServiceConnection: '$(PROD_KUBERNETES_SERVICE_CONN)'
-    poolImage: 'pagopa-prod-linux'
-    appInsightsServiceConn: "$(TF_APPINSIGHTS_SERVICE_CONN_PROD)"
-    appInsightsResourceId: "$(TF_APPINSIGHTS_RESOURCE_ID_PROD)"
+    dockerNamespace: $(PROD_CONTAINER_NAMESPACE)
 
   ${{ if eq(variables['Build.SourceBranchName'], 'merge') }}:
-    sourceBranch: "main" # force to main branch
+    SOURCE_BRANCH: "main" # force to main branch
   ${{ if ne(variables['Build.SourceBranchName'], 'merge') }}:
-    sourceBranch: ${{ variables['Build.SourceBranchName'] }}
+    SOURCE_BRANCH: ${{ variables['Build.SourceBranchName'] }}
 
 
+
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+  title: ""
+  sha: ""
+  tag: ""
+
+# Only manual triggers
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
 
 resources:
   repositories:
@@ -120,104 +127,165 @@ stages:
           - template: templates/docker-release/template.yaml@pagopaCommons
             parameters:
               CONTAINER_REGISTRY_SERVICE_CONN: $(dockerRegistryServiceConnection)
-              CONTAINER_REGISTRY_FQDN: $(dockerRegistryFqdn)
+              CONTAINER_REGISTRY_FQDN: $(dockerNamespace)
               DOCKER_IMAGE_NAME: $(imageRepository)
               DOCKER_IMAGE_TAG: $(current_version)
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
 
-  #  # Testing the docker image
-  #  - stage: Smoke_Test
-  #    dependsOn:
-  #      - Build
-  #    condition: and(succeeded(), eq('${{ parameters.TEST }}', 'true'))
-  #    jobs:
-  #      - job: smoke_tests
-  #        steps:
-  #          - checkout: self
-  #            persistCredentials: true
-  #
-  #          - script: |
-  #              git checkout $(sourceBranch)
-  #            displayName: Checkout and update branch
-  #
-  #          - task: Docker@2
-  #            displayName: "Docker login"
-  #            inputs:
-  #              containerRegistry: "$(dockerRegistryServiceConnection)"
-  #              command: "login"
-  #
-  #          - task: Bash@3
-  #            displayName: 'Run Smoke Tests'
-  #            inputs:
-  #              targetType: 'inline'
-  #              script: |
-  #                cd ./integration-test
-  #                sh run_integration_test.sh
-  #            env:
-  #              containerRegistry: $(dockerRegistryFqdn)
-
-  # Deploy on K8s with Helm
-  - stage: Deploy
-    #    condition: not(failed('Smoke_Test'))
-    dependsOn:
-      - Release
-      - Build
-    #      - Smoke_Test
+  # Deploy on Azure
+  - stage: deploy
     variables:
-      deploy_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
+      current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
+    condition: not(failed('releaseService'))
+    pool:
+      vmImage: "ubuntu-latest"
     jobs:
-      - deployment: "deploy"
-        pool:
-          name: $(poolImage)
-        environment: ${{ parameters['ENV'] }}
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                  persistCredentials: true
+      - job: deployJava
+        steps:
 
-                - script: |
-                    git checkout $(sourceBranch)
-                  displayName: Checkout and update branch
+          - script: |
+              echo ${{variables['Build.SourceBranchName']}}        
+              echo $(SOURCE_BRANCH)
+              echo $(TEST)
 
-                - template: templates/helm-microservice-chart-setup/template.yaml@pagopaCommons
-                  parameters:
-                    DEPLOY_VERSION: $(deploy_version)
+          - checkout: self
+            clean: true
+            persistCredentials: true
+            submodules: true
 
-                - template: templates/helm-microservice-chart-deploy/template.yaml@pagopaCommons
-                  parameters:
-                    DO_DEPLOY: true
-                    ENV: ${{ parameters['ENV'] }}
-                    KUBERNETES_SERVICE_CONN: ${{ variables.kubernetesServiceConnection }}
-                    NAMESPACE: $(nameSpace)
-                    APP_NAME: $(imageRepository)
-                    VALUE_FILE: "helm/values-${{ parameters['ENV'] }}.yaml"
-                    DEPLOY_VERSION: $(deploy_version)
-                    APPINSIGHTS_SERVICE_CONN: ${{ variables.appInsightsServiceConn }}
-                    APPINSIGHTS_RESOURCE_ID: ${{ variables.appInsightsResourceId }}
+          - script: |
+              echo "Checkout on $(SOURCE_BRANCH)"
+              git checkout $(SOURCE_BRANCH)
+            displayName: Checkout on source branch
+
+          - task: Cache@2
+            inputs:
+              key: 'maven | "$(Agent.OS)" | pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+                maven
+              path: $(MAVEN_CACHE_FOLDER)
+            displayName: Set Maven Cache
+
+          - task: Bash@3
+            # When the maven task is installed, mvn can be used in a script
+            name: pomversion
+            inputs:
+              targetType: "inline"
+              script: |
+                version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=next;isOutput=true]$version"
+              failOnStderr: true
+
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              publishJUnitResults: false
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.11'
+              mavenVersionOption: 'Default'
+              mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: false
+              sonarQubeRunAnalysis: false
+
+          # deploy reporting-fn
+          - task: AzureFunctionAppContainer@1
+            displayName: Deploy Function App [DEV|UAT]
+            condition: in('${{ parameters.ENV }}', 'dev', 'uat')
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              appName: "${{variables.APP_NAME}}-authorizer-fn"
+              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
+              slotName: production
+              resourceGroupName: $(RESOURCE_GROUP)
+          - task: AzureFunctionAppContainer@1
+            displayName: Deploy Function App [PROD]
+            condition: eq('${{ parameters.ENV }}', 'prod')
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              appName: "${{variables.APP_NAME}}-fn-${{replace(variables.imageRepository, 'reporting', 'gpd')}}"
+              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
+              deployToSlotOrASE: true
+              slotName: staging
+              resourceGroupName: $(RESOURCE_GROUP)
+
+          - script: |
+              echo "##vso[task.setvariable variable=version;isOutput=true]$(pomversion.next)"
+            name: dockerTag
 
 
-  # Run Tests
-#  - stage: Integration_Test
-#    dependsOn:
-#      - Deploy
-#    condition: and(succeeded(), eq('${{ parameters.TEST }}', 'true'))
+#  # Run test
+#  - stage: test
+#    # run this stage only if 'test' is enabled
+#    condition: and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true'))
+#    pool:
+#      vmImage: "ubuntu-latest"
 #    jobs:
-#      - job: integration_tests
+#      # is needed to wait for startup of application
+#      - job: waitStartup
+#        pool: Server
 #        steps:
-#          - checkout: self
-#            persistCredentials: true
-#
-#          - script: |
-#              git checkout $(sourceBranch)
-#            displayName: Checkout and update branch
-#
-#          - task: Bash@3
-#            displayName: 'Run Integration Tests'
+#          - task: Delay@1
 #            inputs:
-#              targetType: 'inline'
-#              script: |
-#                cd ./integration-test/src
-#                yarn install
-#                yarn test:${{ parameters.ENV }}
+#              delayForMinutes: '10'
+#
+#      #      - job: integrationTests
+#      #        dependsOn: waitStartup
+#      #        steps:
+#      #          - script: |
+#      #              git checkout $(SOURCE_BRANCH)
+#
+#      #          - script: |
+#      #              yarn global add newman
+#      #            displayName: 'newman installation'
+#
+#      #          - script: |
+#      #              newman run api-test/Project.postman_collection.json --environment=api-test/Azure.postman_environment.json --reporters cli,junit --reporter-junit-export Results/api-config-TEST.xml --verbose
+#      #            displayName: 'Run api test'
+#      #            continueOnError: false
+#
+#      #          - task: PublishTestResults@2
+#      #            condition: always()
+#      #            inputs:
+#      #              testResultsFormat: 'JUnit'
+#      #              testResultsFiles: '**/*-TEST.xml'
+#      #              searchFolder: '$(System.DefaultWorkingDirectory)'
+#
+#      - job: deployUAT
+#        dependsOn: integrationTests
+#        variables:
+#          version: $[ stageDependencies.deploy.deployJava.outputs['dockerTag.version'] ]
+#        steps:
+#          - task: Maven@3
+#            inputs:
+#              mavenPomFile: 'pom.xml'
+#              publishJUnitResults: false
+#              javaHomeOption: 'JDKVersion'
+#              jdkVersionOption: '1.11'
+#              mavenVersionOption: 'Default'
+#              mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
+#              mavenAuthenticateFeed: false
+#              effectivePomSkip: false
+#              sonarQubeRunAnalysis: false
+#
+#          - task: Docker@2
+#            displayName: Build and push an image to UAT container registry
+#            inputs:
+#              containerRegistry: '$(UAT_CONTAINER_REGISTRY)'
+#              repository: '$(IMAGE_REPOSITORY)'
+#              command: 'buildAndPush'
+#              tags: |
+#                $(Build.BuildId)
+#                latest
+#                $(version)
+#
+#          # deploy project-fn
+#          - task: AzureFunctionAppContainer@1
+#            displayName: Deploy Function App [UAT]
+#            condition: in('${{ parameters.ENV }}', 'uat')
+#            inputs:
+#              azureSubscription: $(AZURE_SUBSCRIPTION)
+#              appName: "${{variables.UAT_WEB_APP_NAME}}-fn-project}"
+#              imageName: "${{variables.UAT_CONTAINER_NAMESPACE}}/project:$(Build.BuildId)"
+#              slotName: production
