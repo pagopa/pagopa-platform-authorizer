@@ -182,7 +182,7 @@ stages:
               mavenPomFile: 'pom.xml'
               publishJUnitResults: false
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.17'
+              jdkVersionOption: '1.11'
               mavenVersionOption: 'Default'
               mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
               mavenAuthenticateFeed: false
