@@ -98,7 +98,7 @@ stages:
           - ${{ if ne(parameters.SEMVER, 'skip') }}:
               - template: templates/maven-github-release/template.yaml@pagopaCommons
                 parameters:
-                  release_branch: $(sourceBranch)
+                  release_branch: $(SOURCE_BRANCH)
                   gitEmail: $(GIT_EMAIL)
                   gitUsername: $(GIT_USERNAME)
                   gitHubConnection: $(GITHUB_CONNECTION)
@@ -121,7 +121,7 @@ stages:
             persistCredentials: true
 
           - script: |
-              git checkout $(sourceBranch)
+              git checkout $(SOURCE_BRANCH)
             displayName: Checkout and update branch
 
           - template: templates/docker-release/template.yaml@pagopaCommons
