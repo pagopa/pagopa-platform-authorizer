@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.gov.pagopa.authorizer</groupId>
-    <artifactId>authorizer-cache-function</artifactId>
+    <artifactId>platform-authorizer</artifactId>
     <version>0.0.1</version>
     <packaging>jar</packaging>
 
