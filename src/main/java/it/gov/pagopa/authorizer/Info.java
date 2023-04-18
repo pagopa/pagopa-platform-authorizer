@@ -10,6 +10,7 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 
 /**
@@ -23,12 +24,12 @@ public class Info {
      */
     @FunctionName("Info")
     public HttpResponseMessage run (
-            @HttpTrigger(name = "InfoTrigger",
+            @HttpTrigger(name = "PlatformAuthInfoTrigger",
                     methods = {HttpMethod.GET},
                     route = "info",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context) {
-
+        context.getLogger().log(Level.INFO,"Triggered Info API on platform-authorizer");
         return request.createResponseBuilder(HttpStatus.OK).build();
     }
 
