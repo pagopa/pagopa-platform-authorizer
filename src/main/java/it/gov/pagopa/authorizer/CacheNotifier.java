@@ -32,8 +32,8 @@ public class CacheNotifier {
             HttpRequestMessage<Optional<String>> request,
             @CosmosDBInput(
                     name = "CacheNotifierInput",
-                    databaseName = "db",
-                    containerName = "authorization",
+                    databaseName = "authorizer",
+                    containerName = "skeydomains",
                     connection = "COSMOS_CONN_STRING")
                     // sqlQuery = "%TRIGGER_SQL_QUERY%") TODO temporarly commented
             Optional<SubscriptionKeyDomain> triggeredSubkeyDomain,

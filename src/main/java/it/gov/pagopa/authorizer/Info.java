@@ -22,7 +22,7 @@ public class Info {
      * This function will be invoked when a Http Trigger occurs
      * @return
      */
-    @FunctionName("Info")
+    @FunctionName("PlatformAuthInfo")
     public HttpResponseMessage run (
             @HttpTrigger(name = "PlatformAuthInfoTrigger",
                     methods = {HttpMethod.GET},
