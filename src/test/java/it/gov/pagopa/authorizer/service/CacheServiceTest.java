@@ -60,7 +60,7 @@ class CacheServiceTest {
         // Checking assertions
         verify(dao, times(1)).findAuthorizationByDomain(anyString());
         verify(dao, times(1)).close();
-        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         verify(httpClient, times(2)).send(any(), any());
     }
 
@@ -79,7 +79,7 @@ class CacheServiceTest {
         // Checking assertions
         verify(dao, times(1)).findAuthorizationByDomain(anyString());
         verify(dao, times(1)).close();
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         verify(httpClient, times(0)).send(any(), any());
     }
 
@@ -101,7 +101,7 @@ class CacheServiceTest {
         // Checking assertions
         verify(dao, times(1)).findAuthorizationByDomain(anyString());
         verify(dao, times(1)).close();
-        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         verify(realHttpClient, times(2)).send(any(), any());
     }
 
@@ -118,7 +118,7 @@ class CacheServiceTest {
         // Checking assertions
         verify(dao, times(0)).findAuthorizationByDomain(anyString());
         verify(dao, times(0)).close();
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         verify(httpClient, times(0)).send(any(), any());
     }
 
@@ -136,7 +136,7 @@ class CacheServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain);
+        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
 
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
@@ -159,7 +159,7 @@ class CacheServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain);
+        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
 
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
@@ -180,7 +180,7 @@ class CacheServiceTest {
         CacheService cacheService = spy(new CacheService(logger, realHttpClient, "https://api.ENV.pagopa.it", dao));
 
         // Execute function
-        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain);
+        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
 
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
@@ -197,7 +197,7 @@ class CacheServiceTest {
         CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
 
         // Execute function
-        assertThrows(IllegalArgumentException.class, () -> cacheService.addAuthConfigurationToAPIMAuthorizer(null));
+        assertThrows(IllegalArgumentException.class, () -> cacheService.addAuthConfigurationToAPIMAuthorizer(null, true));
 
         // Checking assertions
         verify(httpClient, times(0)).send(any(), any());

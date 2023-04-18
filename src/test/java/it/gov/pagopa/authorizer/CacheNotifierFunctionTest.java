@@ -47,7 +47,7 @@ class CacheNotifierFunctionTest {
 
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-        when(cacheService.addAuthConfigurationToAPIMAuthorizer(any())).thenReturn(mockedHttpResponse);
+        when(cacheService.addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean())).thenReturn(mockedHttpResponse);
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
@@ -70,7 +70,7 @@ class CacheNotifierFunctionTest {
         HttpResponseMessage response = function.run(request, subkeyDomain, context);
 
         // Checking assertions
-        verify(cacheService, times(1)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(1)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         assertEquals(HttpStatus.OK, response.getStatus());
     }
 
@@ -101,7 +101,7 @@ class CacheNotifierFunctionTest {
         HttpResponseMessage response = function.run(request, subkeyDomain, context);
 
         // Checking assertions
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any());
+        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatus());
     }
 
@@ -116,7 +116,7 @@ class CacheNotifierFunctionTest {
         when(function.getCacheService(any())).thenReturn(cacheService);
 
         // Mocking communication with APIM
-        when(cacheService.addAuthConfigurationToAPIMAuthorizer(any())).thenThrow(InterruptedException.class);
+        when(cacheService.addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean())).thenThrow(InterruptedException.class);
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);

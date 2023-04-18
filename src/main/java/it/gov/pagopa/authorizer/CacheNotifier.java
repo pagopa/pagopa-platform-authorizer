@@ -34,8 +34,8 @@ public class CacheNotifier {
                     name = "CacheNotifierInput",
                     databaseName = "db",
                     containerName = "authorization",
-                    connection = "COSMOS_CONN_STRING",
-                    sqlQuery = "%TRIGGER_SQL_QUERY%")
+                    connection = "COSMOS_CONN_STRING")
+                    // sqlQuery = "%TRIGGER_SQL_QUERY%") TODO temporarly commented
             Optional<SubscriptionKeyDomain> triggeredSubkeyDomain,
             final ExecutionContext context) throws InterruptedException {
 
@@ -43,7 +43,7 @@ public class CacheNotifier {
         HttpResponse<String> responseContent = null;
 
         if (triggeredSubkeyDomain.isPresent()) {
-            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain.get());
+            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain.get(), true);
         }
 
         int httpStatusCode = responseContent != null ? responseContent.statusCode() : 500;

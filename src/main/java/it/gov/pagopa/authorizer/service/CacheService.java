@@ -45,27 +45,30 @@ public class CacheService {
         this.dao.close();
         this.logger.log(Level.INFO, "Found {0} elements related to the domain [{1}]", new Object[] {subscriptionKeyDomains.size(), domain});
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
-            HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain);
+            HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
             this.logger.log(Level.INFO, "Requested configuration to APIM for subscription key domain with id [{0}]. Response status: {1}", new Object[] {subkeyDomain.getId(), response == null ? 500 : response.statusCode()});
         }
     }
 
-    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain) throws InterruptedException {
+    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException {
         if (subkeyDomain == null) {
             throw new IllegalArgumentException("Passed null parameter");
         }
         HttpResponse<String> response = null;
         try {
+            String domain = subkeyDomain.getDomain();
             // generating object to be sent
             AuthConfiguration authConfiguration = AuthConfiguration.builder()
-                    .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, subkeyDomain.getDomain(), subkeyDomain.getSubkey()))
+                    .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, domain, subkeyDomain.getSubkey()))
                     .value(Utility.convertListToString(subkeyDomain.getAuthorization(), ","))
                     .build();
             this.logger.log(Level.INFO, "The record with id [{0}] related to the subscription key associated to the domain [{1}] has triggered the execution. Will be added the following entities: [{2}]", new Object[] {subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()});
 
             // executing the request towards APIM Authorizer's API
+            String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath.replace("{domain}", domain), addInProgress);
+            this.logger.log(Level.INFO, "Trying to execute a request to the path [{0}]", new Object[] {refactoredAuthorizerPath});
             HttpRequest apimRequest = HttpRequest.newBuilder()
-                    .uri(new URI(this.authorizerPath))
+                    .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)
                     .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(authConfiguration)))
                     .build();

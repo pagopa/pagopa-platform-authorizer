@@ -3,6 +3,7 @@ package it.gov.pagopa.authorizer.entity;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -18,4 +19,6 @@ public class SubscriptionKeyDomain implements Serializable {
     private String subkey;
 
     private List<String> authorization;
+
+    private Date insertedAt;
 }
