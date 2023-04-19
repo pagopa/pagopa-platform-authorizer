@@ -49,17 +49,6 @@ class CacheNotifierFunctionTest {
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
         when(cacheService.addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean())).thenReturn(mockedHttpResponse);
 
-        // Generating request, mocking the field creation
-        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
-
-        // Generate mock response mocking the field creation
-        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
-        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
-        doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
-        doReturn(builder).when(builder).header(anyString(), anyString());
-        doReturn(HttpStatus.valueOf(mockedHttpResponse.statusCode())).when(responseMock).getStatus();
-        doReturn(responseMock).when(builder).build();
-
         // Execute function
         Optional<SubscriptionKeyDomain> subkeyDomain = Optional.of(SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
@@ -67,11 +56,10 @@ class CacheNotifierFunctionTest {
                 .subkey("subkey")
                 .authorization(List.of("entity1", "entity2"))
                 .build());
-        HttpResponseMessage response = function.run(request, subkeyDomain, context);
+        function.run(subkeyDomain, context);
 
         // Checking assertions
         verify(cacheService, times(1)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        assertEquals(HttpStatus.OK, response.getStatus());
     }
 
     @SneakyThrows
@@ -85,24 +73,12 @@ class CacheNotifierFunctionTest {
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(500).uri(new URI("")).build();
 
-        // Generating request, mocking the field creation
-        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
-
-        // Generate mock response mocking the field creation
-        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
-        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
-        doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
-        doReturn(builder).when(builder).header(anyString(), anyString());
-        doReturn(HttpStatus.valueOf(mockedHttpResponse.statusCode())).when(responseMock).getStatus();
-        doReturn(responseMock).when(builder).build();
-
         // Execute function
         Optional<SubscriptionKeyDomain> subkeyDomain = spy(Optional.empty());
-        HttpResponseMessage response = function.run(request, subkeyDomain, context);
+        function.run(subkeyDomain, context);
 
         // Checking assertions
         verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatus());
     }
 
     @SneakyThrows
@@ -133,6 +109,6 @@ class CacheNotifierFunctionTest {
                 .build());
 
         // Checking assertions
-        assertThrows(InterruptedException.class, () -> function.run(request, subkeyDomain, context));
+        assertThrows(InterruptedException.class, () -> function.run(subkeyDomain, context));
     }
 }
