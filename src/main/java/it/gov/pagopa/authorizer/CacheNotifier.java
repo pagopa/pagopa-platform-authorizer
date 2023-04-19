@@ -1,10 +1,7 @@
 package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.CosmosDBInput;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.DataAccessObject;
@@ -24,18 +21,13 @@ public class CacheNotifier {
     private final String cosmosContainer = System.getenv("SKEYDOMAINS_COSMOS_CONTAINER");
 
     @FunctionName("CacheNotifierFunction")
-    public HttpResponseMessage run (
-            @HttpTrigger(
+    public void run (
+            @CosmosDBTrigger(
                     name = "CacheNotifierTrigger",
-                    methods = {HttpMethod.GET, HttpMethod.POST},
-                    authLevel = AuthorizationLevel.ANONYMOUS)
-            HttpRequestMessage<Optional<String>> request,
-            @CosmosDBInput(
-                    name = "CacheNotifierInput",
                     databaseName = "authorizer",
                     containerName = "skeydomains",
-                    connection = "COSMOS_CONN_STRING")
-                    // sqlQuery = "%TRIGGER_SQL_QUERY%") TODO temporarly commented
+                    connection = "COSMOS_CONN_STRING"
+            )
             Optional<SubscriptionKeyDomain> triggeredSubkeyDomain,
             final ExecutionContext context) throws InterruptedException {
 
@@ -45,13 +37,7 @@ public class CacheNotifier {
         if (triggeredSubkeyDomain.isPresent()) {
             responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain.get(), true);
         }
-
-        int httpStatusCode = responseContent != null ? responseContent.statusCode() : 500;
-        HttpResponseMessage response = request.createResponseBuilder(HttpStatus.valueOf(httpStatusCode))
-                .header("Content-Type", "application/json")
-                .build();
-        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", httpStatusCode);
-        return response;
+        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", responseContent != null ? responseContent.statusCode() : 500);
     }
 
     public CacheService getCacheService(Logger logger) {
