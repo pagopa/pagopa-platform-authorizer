@@ -18,6 +18,8 @@
         <azure.cosmosdb.data.version>3.32.0</azure.cosmosdb.data.version>
         <functionAppName>com.microsoft.azure-20220215182005862</functionAppName>
         <resteasy.version>6.2.3.Final</resteasy.version>
+
+        <cosmosConnString></cosmosConnString>
     </properties>
 
     <dependencies>
@@ -121,6 +123,10 @@
                         <property>
                             <name>FUNCTIONS_EXTENSION_VERSION</name>
                             <value>~3</value>
+                        </property>
+                        <property>
+                            <name>COSMOS_CONN_STRING</name>
+                            <value>${cosmosConnString}</value>
                         </property>
                     </appSettings>
                     <resourceGroup>java-functions-group</resourceGroup>

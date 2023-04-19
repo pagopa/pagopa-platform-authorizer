@@ -39,6 +39,7 @@ variables:
     RESOURCE_GROUP: 'pagopa-d-weu-shared-rg'
     dockerRegistryServiceConnection: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     dockerNamespace: $(DEV_CONTAINER_NAMESPACE)
+    COSMOS_CONN_STRING: $(DEV_COSMOS_CONN_STRING)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
     AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
@@ -157,6 +158,10 @@ stages:
               echo "Checkout on $(SOURCE_BRANCH)"
               git checkout $(SOURCE_BRANCH)
             displayName: Checkout on source branch
+
+          - task: Bash@3
+            env:
+              cosmosConnString: $(COSMOS_CONN_STRING)
 
           - task: Cache@2
             inputs:
