@@ -178,10 +178,6 @@ stages:
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
               failOnStderr: true
 
-          - task: Bash@3
-            env:
-              cosmosConnString: $(COSMOS_CONN_STRING)
-
           - task: Maven@3
             inputs:
               mavenPomFile: 'pom.xml'
