@@ -27,7 +27,9 @@ public class CacheNotifier {
                     name = "CacheNotifierTrigger",
                     databaseName = "authorizer",
                     containerName = "skeydomains",
-                    connection = "COSMOS_CONN_STRING"
+                    connection = "COSMOS_CONN_STRING",
+                    leaseContainerName = "authorizer_lease",
+                    createLeaseContainerIfNotExists = true
             )
             String[] documents,
             final ExecutionContext context) throws InterruptedException {

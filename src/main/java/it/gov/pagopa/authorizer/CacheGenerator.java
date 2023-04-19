@@ -21,7 +21,7 @@ public class CacheGenerator {
             @HttpTrigger(
                     name = "CacheGeneratorTrigger",
                     methods = {HttpMethod.GET},
-                    route = "/cache-generation/domains/{domain}",
+                    route = "cache-generator/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             @BindingName("domain") String domain,
             final ExecutionContext context) throws InterruptedException {
