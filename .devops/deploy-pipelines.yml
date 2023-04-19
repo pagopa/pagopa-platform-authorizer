@@ -159,10 +159,6 @@ stages:
               git checkout $(SOURCE_BRANCH)
             displayName: Checkout on source branch
 
-          - task: Bash@3
-            env:
-              cosmosConnString: $(COSMOS_CONN_STRING)
-
           - task: Cache@2
             inputs:
               key: 'maven | "$(Agent.OS)" | pom.xml'
@@ -181,6 +177,10 @@ stages:
                 version=$(mvn -f pom.xml help:evaluate -Dexpression=project.version -q -DforceStdout)
                 echo "##vso[task.setvariable variable=next;isOutput=true]$version"
               failOnStderr: true
+
+          - task: Bash@3
+            env:
+              cosmosConnString: $(COSMOS_CONN_STRING)
 
           - task: Maven@3
             inputs:
