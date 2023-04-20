@@ -16,10 +16,6 @@ import java.util.logging.Logger;
 public class CacheNotifier {
 
     private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
-    private final String cosmosUri = System.getenv("SKEYDOMAINS_COSMOS_URI");
-    private final String cosmosKey = System.getenv("SKEYDOMAINS_COSMOS_KEY");
-    private final String cosmosDB = System.getenv("SKEYDOMAINS_COSMOS_DB");
-    private final String cosmosContainer = System.getenv("SKEYDOMAINS_COSMOS_CONTAINER");
 
     @FunctionName("CacheNotifierFunction")
     public void run (
@@ -50,13 +46,6 @@ public class CacheNotifier {
     }
 
     public CacheService getCacheService(Logger logger) {
-        return new CacheService(logger,
-                HttpClient.newHttpClient(),
-                authorizerPath,
-                getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer));
-    }
-
-    public DataAccessObject getDAO(String uri, String key, String db, String container) {
-        return new DataAccessObject(uri, key, db, container);
+        return new CacheService(logger, HttpClient.newHttpClient(), authorizerPath);
     }
 }
