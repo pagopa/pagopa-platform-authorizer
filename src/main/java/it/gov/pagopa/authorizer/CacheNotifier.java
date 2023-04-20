@@ -39,10 +39,11 @@ public class CacheNotifier {
                 SubscriptionKeyDomain triggeredSubkeyDomain = mapper.readValue(document, SubscriptionKeyDomain.class);
                 responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
             } catch (JsonProcessingException e) {
-                logger.log(Level.SEVERE, "Error while mapping the following document: {0}", document);
+                logger.log(Level.SEVERE, () -> String.format("Error while mapping the following document: %s", document));
             }
         }
-        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", responseContent != null ? responseContent.statusCode() : 500);
+        final int statusCode = responseContent != null ? responseContent.statusCode() : 500;
+        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %s", statusCode));
     }
 
     public CacheService getCacheService(Logger logger) {

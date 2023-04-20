@@ -36,7 +36,7 @@ public class CacheGenerator {
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
                 .build();
-        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", 200);
+        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %d", 200));
         return response;
     }
 

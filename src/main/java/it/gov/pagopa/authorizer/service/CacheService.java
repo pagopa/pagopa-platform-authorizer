@@ -46,7 +46,8 @@ public class CacheService {
         this.logger.log(Level.INFO, "Found {0} elements related to the domain [{1}]", new Object[] {subscriptionKeyDomains.size(), domain});
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
             HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-            this.logger.log(Level.INFO, "Requested configuration to APIM for subscription key domain with id [{0}]. Response status: {1}", new Object[] {subkeyDomain.getId(), response == null ? 500 : response.statusCode()});
+            final int statusCode = response != null ? response.statusCode() : 500;
+            this.logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
         }
     }
 
@@ -62,11 +63,11 @@ public class CacheService {
                     .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, domain, subkeyDomain.getSubkey()))
                     .value(Utility.convertListToString(subkeyDomain.getAuthorization(), ","))
                     .build();
-            this.logger.log(Level.INFO, "The record with id [{0}] related to the subscription key associated to the domain [{1}] has triggered the execution. Will be added the following entities: [{2}]", new Object[] {subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()});
+            this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. Will be added the following entities: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 
             // executing the request towards APIM Authorizer's API
             String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath.replace("{domain}", domain), addInProgress);
-            this.logger.log(Level.INFO, "Trying to execute a request to the path [{0}]", new Object[] {refactoredAuthorizerPath});
+            this.logger.log(Level.INFO, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
             HttpRequest apimRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)
