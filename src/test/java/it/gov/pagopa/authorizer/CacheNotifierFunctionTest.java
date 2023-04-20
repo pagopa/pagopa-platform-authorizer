@@ -1,5 +1,6 @@
 package it.gov.pagopa.authorizer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
@@ -30,20 +31,15 @@ class CacheNotifierFunctionTest {
     CacheService cacheService;
 
     @Mock
-    DataAccessObject dao;
-
-    @Mock
     ExecutionContext context;
 
     @SneakyThrows
     @Test
     void runOk() {
 
-        /*
         // Mocking service creation
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
-        doReturn(dao).when(function).getDAO(any(), any(), any(), any());
         when(function.getCacheService(any())).thenReturn(cacheService);
 
         // Mocking communication with APIM
@@ -51,73 +47,69 @@ class CacheNotifierFunctionTest {
         when(cacheService.addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean())).thenReturn(mockedHttpResponse);
 
         // Execute function
-        Optional<SubscriptionKeyDomain> subkeyDomain = Optional.of(SubscriptionKeyDomain.builder()
+        SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
                 .subkey("subkey")
                 .authorization(List.of("entity1", "entity2"))
-                .build());
-        function.run(subkeyDomain, context);
+                .build();
+        function.run(new String[]{new ObjectMapper().writeValueAsString(subkeyDomain)}, context);
 
         // Checking assertions
         verify(cacheService, times(1)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-         */
-        assertTrue(true);
     }
 
     @SneakyThrows
     @Test
     void runKO_nullTriggeredRow() {
 
-        /*
         // Mocking service creation
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
 
-        // Mocking communication with APIM
-        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(500).uri(new URI("")).build();
-
         // Execute function
-        Optional<SubscriptionKeyDomain> subkeyDomain = spy(Optional.empty());
-        function.run(subkeyDomain, context);
+        function.run(new String[]{}, context);
 
         // Checking assertions
         verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-         */
-        assertTrue(true);
     }
 
     @SneakyThrows
     @Test
     void runOk_interruptedCommunication() {
 
-        /*
         // Mocking service creation
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
-        doReturn(dao).when(function).getDAO(any(), any(), any(), any());
         when(function.getCacheService(any())).thenReturn(cacheService);
 
         // Mocking communication with APIM
         when(cacheService.addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean())).thenThrow(InterruptedException.class);
 
-        // Generating request, mocking the field creation
-        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
-
-        // Generate mock response mocking the field creation
-        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
-
         // Execute function
-        Optional<SubscriptionKeyDomain> subkeyDomain = Optional.of(SubscriptionKeyDomain.builder()
+        SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
                 .subkey("subkey")
                 .authorization(List.of("entity1", "entity2"))
-                .build());
+                .build();
 
         // Checking assertions
-        assertThrows(InterruptedException.class, () -> function.run(subkeyDomain, context));
-         */
-        assertTrue(true);
+        assertThrows(InterruptedException.class, () -> function.run(new String[]{new ObjectMapper().writeValueAsString(subkeyDomain)}, context));
+    }
+
+    @SneakyThrows
+    @Test
+    void runOk_unparseableException() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        when(context.getLogger()).thenReturn(logger);
+
+        // Execute function
+        function.run(new String[]{"FAKEROW"}, context);
+
+        // Checking assertions
+        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
     }
 }

@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,9 @@ class CacheGeneratorFunctionTest {
     CacheService cacheService;
 
     @Mock
+    DataAccessObject dao;
+
+    @Mock
     ExecutionContext context;
 
     @SneakyThrows
@@ -42,6 +46,7 @@ class CacheGeneratorFunctionTest {
         final String mockDomainParameter = "mock_domain";
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
+        doReturn(dao).when(function).getDAO(any(), any(), any(), any());
         when(function.getCacheService(any())).thenReturn(cacheService);
 
         // Mocking communication with APIM
