@@ -41,9 +41,10 @@ public class CacheService {
         if (domain == null) {
             throw new IllegalArgumentException("Passed null parameter");
         }
+        this.dao.setLogger(this.logger);
         List<SubscriptionKeyDomain> subscriptionKeyDomains = this.dao.findAuthorizationByDomain(domain);
         this.dao.close();
-        this.logger.log(Level.INFO, "Found {0} elements related to the domain [{1}]", new Object[] {subscriptionKeyDomains.size(), domain});
+        this.logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain [%s]", subscriptionKeyDomains.size(), domain));
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
             HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
             final int statusCode = response != null ? response.statusCode() : 500;
