@@ -7,6 +7,7 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +44,8 @@ public class DataAccessObject {
         this.logger.log(Level.INFO, () -> String.format("Trying to execute the query: [%s]", query));
         CosmosPagedIterable<SubscriptionKeyDomain> subscriptionKeyDomains = container.queryItems(query, new CosmosQueryRequestOptions(), SubscriptionKeyDomain.class);
         this.logger.log(Level.INFO, () -> String.format("Query executed. Found [%s] elements.", subscriptionKeyDomains.stream().count()));
-        while (subscriptionKeyDomains.iterator().hasNext()) {
+        Iterator<SubscriptionKeyDomain> it = subscriptionKeyDomains.iterator();
+        while (it.hasNext()) {
             SubscriptionKeyDomain subscriptionKeyDomain = subscriptionKeyDomains.iterator().next();
             results.add(subscriptionKeyDomain);
             this.logger.log(Level.INFO, () -> String.format("The following list of entities are related to the domain [%s] at subscription key [%s******]: [%s]", subscriptionKeyDomain.getDomain(), subscriptionKeyDomain.getSubkey().substring(0, 3), subscriptionKeyDomain.getAuthorization()));
