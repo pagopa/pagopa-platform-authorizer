@@ -46,7 +46,7 @@ public class DataAccessObject {
         this.logger.log(Level.INFO, () -> String.format("Query executed. Found [%s] elements.", subscriptionKeyDomains.stream().count()));
         Iterator<SubscriptionKeyDomain> it = subscriptionKeyDomains.iterator();
         while (it.hasNext()) {
-            SubscriptionKeyDomain subscriptionKeyDomain = subscriptionKeyDomains.iterator().next();
+            SubscriptionKeyDomain subscriptionKeyDomain = it.next();
             results.add(subscriptionKeyDomain);
             this.logger.log(Level.INFO, () -> String.format("The following list of entities are related to the domain [%s] at subscription key [%s******]: [%s]", subscriptionKeyDomain.getDomain(), subscriptionKeyDomain.getSubkey().substring(0, 3), subscriptionKeyDomain.getAuthorization()));
         }
