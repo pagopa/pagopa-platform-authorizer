@@ -6,7 +6,6 @@ import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -22,10 +21,11 @@ public class CacheNotifier {
             @CosmosDBTrigger(
                     name = "CacheNotifierTrigger",
                     databaseName = "authorizer",
-                    containerName = "skeydomains",
-                    connection = "COSMOS_CONN_STRING",
-                    leaseContainerName = "authorizer_lease",
-                    createLeaseContainerIfNotExists = true
+                    collectionName = "skeydomains",
+                    leaseCollectionName = "authorizer-leases",
+                    createLeaseCollectionIfNotExists = true,
+                    maxItemsPerInvocation=100,
+                    connectionStringSetting = "COSMOS_CONN_STRING"
             )
             String[] documents,
             final ExecutionContext context) throws InterruptedException {
