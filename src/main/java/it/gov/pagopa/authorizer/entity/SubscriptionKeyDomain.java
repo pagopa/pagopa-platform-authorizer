@@ -7,7 +7,6 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.List;
 
 @Container(containerName = "skeydomains")
@@ -28,6 +27,4 @@ public class SubscriptionKeyDomain implements Serializable {
     private String subkey;
 
     private List<String> authorization;
-
-    private LocalDate insertedAt;
 }
