@@ -129,7 +129,7 @@ stages:
           - template: templates/maven-github-current-version/template.yaml@pagopaCommons
 
   # Build and Push Docker Image
-  - stage: Build Docker images
+  - stage: Build
     dependsOn: Release
     variables:
       current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
@@ -152,7 +152,7 @@ stages:
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
 
   # Deploy on Azure
-  - stage: Deploy functions
+  - stage: deploy
     variables:
       current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
     condition: not(failed('releaseService'))
@@ -234,7 +234,7 @@ stages:
             name: dockerTag
 
   # Run test
-  - stage: Integration test
+  - stage: test
     # run this stage only if 'test' is enabled
     condition: and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true'))
     pool:
