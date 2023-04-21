@@ -9,6 +9,7 @@ import it.gov.pagopa.authorizer.service.CacheService;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,20 +28,14 @@ public class CacheNotifier {
                     maxItemsPerInvocation=100,
                     connectionStringSetting = "COSMOS_CONN_STRING"
             )
-            String[] documents,
+            List<SubscriptionKeyDomain> triggeredSubkeyDomains,
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
         HttpResponse<String> responseContent = null;
 
-        ObjectMapper mapper = new ObjectMapper();
-        for (String document : documents) {
-            try {
-                SubscriptionKeyDomain triggeredSubkeyDomain = mapper.readValue(document, SubscriptionKeyDomain.class);
-                responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
-            } catch (JsonProcessingException e) {
-                logger.log(Level.SEVERE, () -> String.format("Error while mapping the following document: %s", document));
-            }
+        for (SubscriptionKeyDomain triggeredSubkeyDomain : triggeredSubkeyDomains) {
+            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
         }
         final int statusCode = responseContent != null ? responseContent.statusCode() : 500;
         logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %s", statusCode));

@@ -53,7 +53,7 @@ class CacheNotifierFunctionTest {
                 .subkey("subkey")
                 .authorization(List.of("entity1", "entity2"))
                 .build();
-        function.run(new String[]{new ObjectMapper().writeValueAsString(subkeyDomain)}, context);
+        function.run(List.of(subkeyDomain), context);
 
         // Checking assertions
         verify(cacheService, times(1)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
@@ -68,7 +68,7 @@ class CacheNotifierFunctionTest {
         when(context.getLogger()).thenReturn(logger);
 
         // Execute function
-        function.run(new String[]{}, context);
+        function.run(List.of(), context);
 
         // Checking assertions
         verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
@@ -95,21 +95,6 @@ class CacheNotifierFunctionTest {
                 .build();
 
         // Checking assertions
-        assertThrows(InterruptedException.class, () -> function.run(new String[]{new ObjectMapper().writeValueAsString(subkeyDomain)}, context));
-    }
-
-    @SneakyThrows
-    @Test
-    void runOk_unparseableException() {
-
-        // Mocking service creation
-        Logger logger = Logger.getLogger("example-test-logger");
-        when(context.getLogger()).thenReturn(logger);
-
-        // Execute function
-        function.run(new String[]{"FAKEROW"}, context);
-
-        // Checking assertions
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
+        assertThrows(InterruptedException.class, () -> function.run(List.of(subkeyDomain), context));
     }
 }
