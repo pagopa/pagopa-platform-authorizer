@@ -18,7 +18,7 @@ parameters:
       - skip
     default: skip
   - name: TEST
-    displayName: Run tests
+    displayName: Run integration tests
     type: boolean
     default: false
   - name: "FORCE_REPLACE_DOCKER_IMAGE"
@@ -28,10 +28,6 @@ parameters:
     values:
       - False
       - True
-  - name: INTEGRATION_TEST
-    displayName: Run integration tests
-    type: boolean
-    default: true
 
 variables:
   imageRepository: '$(IMAGE_REPOSITORY_NAME)'
@@ -133,7 +129,7 @@ stages:
           - template: templates/maven-github-current-version/template.yaml@pagopaCommons
 
   # Build and Push Docker Image
-  - stage: Build
+  - stage: Build Docker images
     dependsOn: Release
     variables:
       current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
@@ -156,7 +152,7 @@ stages:
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
 
   # Deploy on Azure
-  - stage: deploy
+  - stage: Deploy functions
     variables:
       current_version: $[ stageDependencies.Release.make_release.outputs['current_version.value'] ]
     condition: not(failed('releaseService'))
@@ -238,7 +234,7 @@ stages:
             name: dockerTag
 
   # Run test
-  - stage: test
+  - stage: Integration test
     # run this stage only if 'test' is enabled
     condition: and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true'))
     pool:
