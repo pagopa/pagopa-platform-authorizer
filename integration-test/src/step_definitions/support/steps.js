@@ -1,4 +1,4 @@
-const { After, Before, Given, Then, When } = require('@cucumber/cucumber');
+const { After, Before, Given, setDefaultTimeout, Then, When } = require('@cucumber/cucumber');
 const { 
     assertStatusCodeEquals, 
     assertStatusCodeNotEquals,
