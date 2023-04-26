@@ -37,8 +37,8 @@ variables:
     APP_NAME: $(DEV_WEB_APP_NAME)
     STAGE: "d"
     RESOURCE_GROUP: 'pagopa-d-weu-shared-rg'
-    CONTAINER_REGISTRY: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerNamespace: $(DEV_CONTAINER_NAMESPACE)
+    CONTAINER_REGISTRY_SERVICE_CONN: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
+    CONTAINER_NAMESPACE: $(DEV_CONTAINER_NAMESPACE)
     COSMOS_CONN_STRING: $(DEV_COSMOS_CONN_STRING)
     # integration tests variables
     COSMOSDB_URI: $(DEV_AUTH_COSMOS_URI)
@@ -52,8 +52,8 @@ variables:
     APP_NAME: $(UAT_WEB_APP_NAME)
     STAGE: "u"
     RESOURCE_GROUP: 'pagopa-u-weu-shared-rg'
-    CONTAINER_REGISTRY: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerNamespace: $(UAT_CONTAINER_NAMESPACE)
+    CONTAINER_REGISTRY_SERVICE_CONN: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
+    CONTAINER_NAMESPACE: $(UAT_CONTAINER_NAMESPACE)
     # integration tests variables
     COSMOSDB_URI: $(UAT_AUTH_COSMOS_URI)
     COSMOSDB_KEY: $(UAT_AUTH_COSMOS_KEY)
@@ -66,8 +66,8 @@ variables:
     APP_NAME: $(PROD_WEB_APP_NAME)
     STAGE: "p"
     RESOURCE_GROUP: 'pagopa-p-weu-shared-rg'
-    CONTAINER_REGISTRY: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
-    dockerNamespace: $(PROD_CONTAINER_NAMESPACE)
+    CONTAINER_REGISTRY_SERVICE_CONN: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
+    CONTAINER_NAMESPACE: $(PROD_CONTAINER_NAMESPACE)
     # integration tests variables
     COSMOSDB_URI: $(PROD_AUTH_COSMOS_URI)
     COSMOSDB_KEY: $(PROD_AUTH_COSMOS_KEY)
@@ -145,8 +145,8 @@ stages:
 
           - template: templates/docker-release/template.yaml@pagopaCommons
             parameters:
-              CONTAINER_REGISTRY_SERVICE_CONN: $(CONTAINER_REGISTRY)
-              CONTAINER_REGISTRY_FQDN: $(dockerNamespace)
+              CONTAINER_REGISTRY_SERVICE_CONN: $(CONTAINER_REGISTRY_SERVICE_CONN)
+              CONTAINER_REGISTRY_FQDN: $(CONTAINER_NAMESPACE)
               DOCKER_IMAGE_NAME: $(imageRepository)
               DOCKER_IMAGE_TAG: $(current_version)
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
@@ -215,7 +215,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-shared-authorizer-fn"
-              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
+              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
               slotName: production
               resourceGroupName: $(RESOURCE_GROUP)
           - task: AzureFunctionAppContainer@1
@@ -224,7 +224,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
               appName: "${{variables.APP_NAME}}-shared-authorizer-fn"
-              imageName: "${{variables.dockerNamespace}}/${{ variables.imageRepository }}:latest"
+              imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
               deployToSlotOrASE: true
               slotName: staging
               resourceGroupName: $(RESOURCE_GROUP)
