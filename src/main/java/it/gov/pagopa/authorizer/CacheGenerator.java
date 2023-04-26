@@ -9,6 +9,7 @@ import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.DataAccessObject;
 
 import java.net.http.HttpClient;
+import java.util.Calendar;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,10 +46,14 @@ public class CacheGenerator {
 
     public CacheService getCacheService(Logger logger) {
         if (this.httpClient == null) {
+            long start = Calendar.getInstance().getTimeInMillis();
             this.httpClient = HttpClient.newHttpClient();
+            logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         }
         if (this.dao == null) {
+            long start = Calendar.getInstance().getTimeInMillis();
             this.dao = getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer);
+            logger.log(Level.INFO, () -> String.format("Generated a new stub for DAO in  [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         }
         return new CacheService(logger,
                 this.httpClient,
