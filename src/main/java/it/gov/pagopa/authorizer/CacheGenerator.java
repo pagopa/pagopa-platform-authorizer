@@ -21,6 +21,9 @@ public class CacheGenerator {
     private final String cosmosDB = System.getenv("SKEYDOMAINS_COSMOS_DB");
     private final String cosmosContainer = System.getenv("SKEYDOMAINS_COSMOS_CONTAINER");
 
+    private HttpClient httpClient;
+    private DataAccessObject dao;
+
     @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
             @HttpTrigger(
@@ -41,10 +44,16 @@ public class CacheGenerator {
     }
 
     public CacheService getCacheService(Logger logger) {
+        if (this.httpClient == null) {
+            this.httpClient = HttpClient.newHttpClient();
+        }
+        if (this.dao == null) {
+            this.dao = getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer);
+        }
         return new CacheService(logger,
-                HttpClient.newHttpClient(),
+                this.httpClient,
                 authorizerPath,
-                getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer));
+                this.dao);
     }
 
     public DataAccessObject getDAO(String uri, String key, String db, String container) {
