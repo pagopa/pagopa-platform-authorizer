@@ -47,7 +47,7 @@ class CacheGeneratorFunctionTest {
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
         doReturn(dao).when(function).getDAO(any(), any(), any(), any());
-        when(function.getCacheService(any())).thenReturn(cacheService);
+        when(function.getCacheService(logger)).thenReturn(cacheService);
 
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
