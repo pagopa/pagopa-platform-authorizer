@@ -40,13 +40,12 @@ variables:
     RESOURCE_GROUP: 'pagopa-d-weu-shared-rg'
     CONTAINER_REGISTRY_SERVICE_CONN: $(DEV_CONTAINER_REGISTRY_SERVICE_CONN)
     CONTAINER_NAMESPACE: $(DEV_CONTAINER_NAMESPACE)
-    COSMOS_CONN_STRING: $(DEV_COSMOS_CONN_STRING)
     # integration tests variables
     COSMOSDB_URI: $(DEV_AUTH_COSMOS_URI)
     COSMOSDB_KEY: $(DEV_AUTH_COSMOS_KEY)
     INTEGRTEST_EXT_SUBSCRIPTION_KEY: $(DEV_INTEGRTEST_EXT_SUBSCRIPTION_KEY)
-    INTEGRTEST_USED_SUBKEY: $(DEV_INTEGRTEST_USED_SUBKEY)
-    INTEGRTEST_UNUSED_SUBKEY: $(DEV_INTEGRTEST_UNUSED_SUBKEY)
+    INTEGRTEST_VALID_SUBKEY: $(DEV_INTEGRTEST_VALID_SUBKEY)
+    INTEGRTEST_INVALID_SUBKEY: $(DEV_INTEGRTEST_INVALID_SUBKEY)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
     poolImage: 'pagopa-uat-linux'
@@ -60,8 +59,8 @@ variables:
     COSMOSDB_URI: $(UAT_AUTH_COSMOS_URI)
     COSMOSDB_KEY: $(UAT_AUTH_COSMOS_KEY)
     INTEGRTEST_EXT_SUBSCRIPTION_KEY: $(UAT_INTEGRTEST_EXT_SUBSCRIPTION_KEY)
-    INTEGRTEST_USED_SUBKEY: $(UAT_INTEGRTEST_USED_SUBKEY)
-    INTEGRTEST_UNUSED_SUBKEY: $(UAT_INTEGRTEST_UNUSED_SUBKEY)
+    INTEGRTEST_VALID_SUBKEY: $(UAT_INTEGRTEST_VALID_SUBKEY)
+    INTEGRTEST_INVALID_SUBKEY: $(UAT_INTEGRTEST_INVALID_SUBKEY)
 
   ${{ if eq(parameters['ENV'], 'prod') }}:
     poolImage: 'pagopa-prod-linux'
@@ -71,12 +70,6 @@ variables:
     RESOURCE_GROUP: 'pagopa-p-weu-shared-rg'
     CONTAINER_REGISTRY_SERVICE_CONN: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
     CONTAINER_NAMESPACE: $(PROD_CONTAINER_NAMESPACE)
-    # integration tests variables
-    COSMOSDB_URI: $(PROD_AUTH_COSMOS_URI)
-    COSMOSDB_KEY: $(PROD_AUTH_COSMOS_KEY)
-    INTEGRTEST_EXT_SUBSCRIPTION_KEY: $(PROD_INTEGRTEST_EXT_SUBSCRIPTION_KEY)
-    INTEGRTEST_USED_SUBKEY: $(PROD_INTEGRTEST_USED_SUBKEY)
-    INTEGRTEST_UNUSED_SUBKEY: $(PROD_INTEGRTEST_UNUSED_SUBKEY)
 
   ${{ if eq(variables['Build.SourceBranchName'], 'merge') }}:
     SOURCE_BRANCH: "main" # force to main branch
@@ -238,8 +231,9 @@ stages:
 
   # Run test
   - stage: test
-    # run this stage only if 'test' is enabled
-    condition: and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true'))
+    # run this stage only if 'test' is enabled and is not deploying in prod
+    condition: and(and(not(failed('deployJava')), eq('${{ parameters.TEST }}', 'true')), ne('${{ parameters.ENV }}', 'prod'))
+
     pool:
       vmImage: "ubuntu-latest"
     jobs:
@@ -275,8 +269,8 @@ stages:
               export COSMOSDB_URI=$(COSMOSDB_URI)
               export COSMOSDB_KEY=$(COSMOSDB_KEY)
               export INTEGRTEST_EXT_SUBSCRIPTION_KEY=$(INTEGRTEST_EXT_SUBSCRIPTION_KEY)
-              export INTEGRTEST_USED_SUBKEY=$(INTEGRTEST_USED_SUBKEY)
-              export INTEGRTEST_UNUSED_SUBKEY=$(INTEGRTEST_UNUSED_SUBKEY)
+              export INTEGRTEST_VALID_SUBKEY=$(INTEGRTEST_VALID_SUBKEY)
+              export INTEGRTEST_INVALID_SUBKEY=$(INTEGRTEST_INVALID_SUBKEY)
               sh run_integration_test.sh ${{ parameters.ENV }}
             displayName: Run integration test
 
