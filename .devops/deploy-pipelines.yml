@@ -274,9 +274,9 @@ stages:
               cd ./integration-test
               export COSMOSDB_URI=$(COSMOSDB_URI)
               export COSMOSDB_KEY=$(COSMOSDB_KEY)
-              export EXT_SUBSCRIPTION_KEY=$(INTEGRTEST_EXT_SUBSCRIPTION_KEY)
-              export SUBKEY_A=$(INTEGRTEST_USED_SUBKEY)
-              export SUBKEY_B=$(INTEGRTEST_UNUSED_SUBKEY)
+              export INTEGRTEST_EXT_SUBSCRIPTION_KEY=$(INTEGRTEST_EXT_SUBSCRIPTION_KEY)
+              export INTEGRTEST_USED_SUBKEY=$(INTEGRTEST_USED_SUBKEY)
+              export INTEGRTEST_UNUSED_SUBKEY=$(INTEGRTEST_UNUSED_SUBKEY)
               sh run_integration_test.sh ${{ parameters.ENV }}
             displayName: Run integration test
 
