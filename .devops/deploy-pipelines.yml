@@ -33,6 +33,7 @@ variables:
   imageRepository: '$(IMAGE_REPOSITORY_NAME)'
 
   ${{ if eq(parameters['ENV'], 'dev') }}:
+    poolImage: 'pagopa-dev-linux'
     AZURE_SUBSCRIPTION: $(DEV_AZURE_SUBSCRIPTION)
     APP_NAME: $(DEV_WEB_APP_NAME)
     STAGE: "d"
@@ -48,6 +49,7 @@ variables:
     INTEGRTEST_UNUSED_SUBKEY: $(DEV_INTEGRTEST_UNUSED_SUBKEY)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
+    poolImage: 'pagopa-uat-linux'
     AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
     APP_NAME: $(UAT_WEB_APP_NAME)
     STAGE: "u"
@@ -62,6 +64,7 @@ variables:
     INTEGRTEST_UNUSED_SUBKEY: $(UAT_INTEGRTEST_UNUSED_SUBKEY)
 
   ${{ if eq(parameters['ENV'], 'prod') }}:
+    poolImage: 'pagopa-prod-linux'
     AZURE_SUBSCRIPTION: $(PROD_AZURE_SUBSCRIPTION)
     APP_NAME: $(PROD_WEB_APP_NAME)
     STAGE: "p"
