@@ -8,6 +8,10 @@ const {
     generateAuthorization 
 } = require('./logic/common_logic');
 
+
+/* Setting defaul timeout to 30s. */
+setDefaultTimeout(30 * 60 * 1000);
+
 let bundle = {
     authorization_id: undefined,
     domain: undefined,
