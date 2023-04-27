@@ -1,10 +1,8 @@
 package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.BindingName;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.microsoft.azure.functions.annotation.*;
+import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.DataAccessObject;
 
@@ -32,11 +30,17 @@ public class CacheGenerator {
                     methods = {HttpMethod.GET},
                     route = "api/cache-generator/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
-            @BindingName("domain") String domain,
+            @CosmosDBInput(
+                    name = "SkeydomainsInput",
+                    databaseName = "authorizer",
+                    collectionName = "skeydomains",
+                    sqlQuery = "SELECT * FROM SubscriptionKeyDomain s WHERE s.domain = {domain}",
+                    connectionStringSetting = "COSMOS_CONN_STRING"
+            ) SubscriptionKeyDomain[] subscriptionKeyDomains,
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
-        this.getCacheService(logger).addAuthConfigurationBulkToApimAuthorizer(domain);
+        this.getCacheService(logger).addAuthConfigurationBulkToApimAuthorizer(subscriptionKeyDomains);
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
                 .build();
@@ -50,15 +54,16 @@ public class CacheGenerator {
             this.httpClient = HttpClient.newHttpClient();
             logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         }
+        /*
         if (this.dao == null) {
             long start = Calendar.getInstance().getTimeInMillis();
             this.dao = getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer);
             logger.log(Level.INFO, () -> String.format("Generated a new stub for DAO in  [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         }
+         */
         return new CacheService(logger,
                 this.httpClient,
-                authorizerPath,
-                this.dao);
+                authorizerPath);
     }
 
     public DataAccessObject getDAO(String uri, String key, String db, String container) {

@@ -24,7 +24,7 @@ public class CacheService {
 
     private final HttpClient httpClient;
 
-    private final DataAccessObject dao;
+    //private final DataAccessObject dao;
 
     public CacheService(Logger logger, HttpClient httpClient, String authorizerPath) {
         this(logger, httpClient, authorizerPath, null);
@@ -33,18 +33,12 @@ public class CacheService {
     public CacheService(Logger logger, HttpClient httpClient, String authorizerPath, DataAccessObject dao) {
         this.logger = logger;
         this.httpClient = httpClient;
-        this.dao = dao;
+        //this.dao = dao;
         this.authorizerPath = authorizerPath;
     }
 
-    public void addAuthConfigurationBulkToApimAuthorizer(String domain) throws InterruptedException {
-        if (domain == null) {
-            throw new IllegalArgumentException("Passed null parameter");
-        }
-        this.dao.setLogger(this.logger);
-        List<SubscriptionKeyDomain> subscriptionKeyDomains = this.dao.findAuthorizationByDomain(domain);
-        this.dao.close();
-        this.logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain [%s]", subscriptionKeyDomains.size(), domain));
+    public void addAuthConfigurationBulkToApimAuthorizer(SubscriptionKeyDomain[] subscriptionKeyDomains) throws InterruptedException {
+        this.logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain", subscriptionKeyDomains.length));
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
             HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
             final int statusCode = response != null ? response.statusCode() : 500;
