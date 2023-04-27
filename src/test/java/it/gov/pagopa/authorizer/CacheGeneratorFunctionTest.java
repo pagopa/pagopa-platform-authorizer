@@ -55,6 +55,7 @@ class CacheGeneratorFunctionTest {
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
+        doReturn(new URI("")).when(request).getUri();
 
         // Generate mock response mocking the field creation
         final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
