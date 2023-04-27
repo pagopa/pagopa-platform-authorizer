@@ -36,7 +36,7 @@ public class CacheGenerator {
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
-        logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain [%s]", subscriptionKeyDomains.length, request.getQueryParameters().get("domain")));
+        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) related to the requested domain.", request.getUri().getPath(), subscriptionKeyDomains.length));
         CacheService cacheService = getCacheService(logger);
         for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
             HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
