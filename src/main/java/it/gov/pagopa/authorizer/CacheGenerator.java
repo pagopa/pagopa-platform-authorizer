@@ -4,9 +4,10 @@ import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
+import it.gov.pagopa.authorizer.util.Constants;
 
 import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -14,14 +15,9 @@ import java.util.logging.Logger;
 
 public class CacheGenerator {
 
-    private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
-    private final String cosmosUri = System.getenv("SKEYDOMAINS_COSMOS_URI");
-    private final String cosmosKey = System.getenv("SKEYDOMAINS_COSMOS_KEY");
-    private final String cosmosDB = System.getenv("SKEYDOMAINS_COSMOS_DB");
-    private final String cosmosContainer = System.getenv("SKEYDOMAINS_COSMOS_CONTAINER");
+    private final String authorizerPath = System.getenv(Constants.REFRESH_CONFIG_PATH_PARAMETER);
 
     private HttpClient httpClient;
-    private DataAccessObject dao;
 
     @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
@@ -40,7 +36,14 @@ public class CacheGenerator {
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
-        this.getCacheService(logger).addAuthConfigurationBulkToApimAuthorizer(subscriptionKeyDomains);
+        logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain [%s]", subscriptionKeyDomains.length, request.getQueryParameters().get("domain")));
+        CacheService cacheService = getCacheService(logger);
+        for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
+            HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
+            final int statusCode = response != null ? response.statusCode() : 500;
+            logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
+        }
+
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
                 .build();
@@ -54,19 +57,6 @@ public class CacheGenerator {
             this.httpClient = HttpClient.newHttpClient();
             logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         }
-        /*
-        if (this.dao == null) {
-            long start = Calendar.getInstance().getTimeInMillis();
-            this.dao = getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer);
-            logger.log(Level.INFO, () -> String.format("Generated a new stub for DAO in  [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
-        }
-         */
-        return new CacheService(logger,
-                this.httpClient,
-                authorizerPath);
-    }
-
-    public DataAccessObject getDAO(String uri, String key, String db, String container) {
-        return new DataAccessObject(uri, key, db, container);
+        return new CacheService(logger, this.httpClient, authorizerPath);
     }
 }

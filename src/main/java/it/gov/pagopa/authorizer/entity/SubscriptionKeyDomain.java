@@ -12,7 +12,6 @@ import java.util.List;
 @Container(containerName = "skeydomains")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class SubscriptionKeyDomain implements Serializable {

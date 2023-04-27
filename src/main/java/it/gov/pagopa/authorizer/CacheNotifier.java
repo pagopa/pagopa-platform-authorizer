@@ -1,11 +1,10 @@
 package it.gov.pagopa.authorizer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
+import it.gov.pagopa.authorizer.util.Constants;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 
 public class CacheNotifier {
 
-    private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
+    private final String authorizerPath = System.getenv(Constants.REFRESH_CONFIG_PATH_PARAMETER);
 
     @FunctionName("CacheNotifierFunction")
     public void run (

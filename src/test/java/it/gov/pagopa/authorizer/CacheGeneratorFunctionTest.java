@@ -4,8 +4,8 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -16,14 +16,19 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CacheGeneratorFunctionTest {
+
+    private static final String DOMAIN = "domain";
 
     @Spy
     CacheGenerator function;
@@ -32,27 +37,21 @@ class CacheGeneratorFunctionTest {
     CacheService cacheService;
 
     @Mock
-    DataAccessObject dao;
-
-    @Mock
     ExecutionContext context;
 
     @SneakyThrows
     @Test
     void runOk() {
 
-        /*
         // Mocking service creation
-        final String mockDomainParameter = "mock_domain";
         Logger logger = Logger.getLogger("example-test-logger");
+        SubscriptionKeyDomain[] retrievedSubscriptionKeyDomains = getSubscriptionKeyDomains();
         when(context.getLogger()).thenReturn(logger);
-        doReturn(dao).when(function).getDAO(any(), any(), any(), any());
         when(function.getCacheService(logger)).thenReturn(cacheService);
 
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-        ArgumentCaptor<String> domainInputCaptor = ArgumentCaptor.forClass(String.class);
-        doNothing().when(cacheService).addAuthConfigurationBulkToApimAuthorizer(domainInputCaptor.capture());
+        doReturn(mockedHttpResponse).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
@@ -66,12 +65,26 @@ class CacheGeneratorFunctionTest {
         doReturn(responseMock).when(builder).build();
 
         // Execute function
-        HttpResponseMessage response = function.run(request, mockDomainParameter, context);
+        HttpResponseMessage response = function.run(request, retrievedSubscriptionKeyDomains, context);
 
         // Checking assertions
-        assertEquals(mockDomainParameter, domainInputCaptor.getValue());
         assertEquals(HttpStatus.OK, response.getStatus());
-         */
-        assertTrue(true);
+    }
+
+    private SubscriptionKeyDomain[] getSubscriptionKeyDomains() {
+        return new SubscriptionKeyDomain[]{
+                SubscriptionKeyDomain.builder()
+                        .id(UUID.randomUUID().toString())
+                        .domain(DOMAIN)
+                        .subkey("1")
+                        .authorization(List.of("entity1", "entity2", "entity3"))
+                        .build(),
+                SubscriptionKeyDomain.builder()
+                        .id(UUID.randomUUID().toString())
+                        .domain(DOMAIN)
+                        .subkey("2")
+                        .authorization(List.of("entity1", "entity4"))
+                        .build()
+        };
     }
 }

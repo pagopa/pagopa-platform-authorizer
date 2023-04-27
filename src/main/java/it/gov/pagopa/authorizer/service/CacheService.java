@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,26 +23,10 @@ public class CacheService {
 
     private final HttpClient httpClient;
 
-    //private final DataAccessObject dao;
-
     public CacheService(Logger logger, HttpClient httpClient, String authorizerPath) {
-        this(logger, httpClient, authorizerPath, null);
-    }
-
-    public CacheService(Logger logger, HttpClient httpClient, String authorizerPath, DataAccessObject dao) {
         this.logger = logger;
         this.httpClient = httpClient;
-        //this.dao = dao;
         this.authorizerPath = authorizerPath;
-    }
-
-    public void addAuthConfigurationBulkToApimAuthorizer(SubscriptionKeyDomain[] subscriptionKeyDomains) throws InterruptedException {
-        this.logger.log(Level.INFO, () -> String.format("Found %d elements related to the domain", subscriptionKeyDomains.length));
-        for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
-            HttpResponse<String> response = addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-            final int statusCode = response != null ? response.statusCode() : 500;
-            this.logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
-        }
     }
 
     public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException {

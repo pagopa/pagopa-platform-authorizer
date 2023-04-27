@@ -1,10 +1,8 @@
 package it.gov.pagopa.authorizer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -15,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
