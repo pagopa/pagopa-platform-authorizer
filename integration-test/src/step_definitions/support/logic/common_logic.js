@@ -51,7 +51,7 @@ async function assertStatusCodeEquals(response, statusCode) {
 
 async function assertStatusCodeNotEquals(response, statusCode) {
     console.log(` - Then the client receives status code different from [${statusCode}]..`);
-    assert.ok(response.status != statusCode);
+    assert.ok(response.status !== statusCode);
 }
 
 module.exports = {

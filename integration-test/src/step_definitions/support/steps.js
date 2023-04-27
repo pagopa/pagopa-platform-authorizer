@@ -10,7 +10,7 @@ const {
 
 
 /* Setting defaul timeout to 30s. */
-setDefaultTimeout(30 * 60 * 1000);
+setDefaultTimeout(30 * 1000);
 
 let bundle = {
     authorization_id: undefined,
