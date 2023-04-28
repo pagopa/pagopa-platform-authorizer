@@ -204,7 +204,7 @@ stages:
               effectivePomSkip: false
               sonarQubeRunAnalysis: false
 
-          # deploy function
+          # deploy function on dev/uat environment
           - task: AzureFunctionAppContainer@1
             displayName: Deploy Function App [DEV|UAT]
             condition: in('${{ parameters.ENV }}', 'dev', 'uat')
@@ -214,8 +214,10 @@ stages:
               imageName: "${{variables.CONTAINER_NAMESPACE}}/${{ variables.imageRepository }}:latest"
               slotName: production
               resourceGroupName: $(RESOURCE_GROUP)
+
+          # deploy function on production environment
           - task: AzureFunctionAppContainer@1
-            displayName: Deploy Function App [PROD]
+            displayName: Deploy Function App [PROD] staging
             condition: eq('${{ parameters.ENV }}', 'prod')
             inputs:
               azureSubscription: $(AZURE_SUBSCRIPTION)
@@ -228,6 +230,37 @@ stages:
           - script: |
               echo "##vso[task.setvariable variable=version;isOutput=true]$(pomversion.next)"
             name: dockerTag
+
+  - stage: deployApprovalPROD
+    condition: eq('${{ parameters.ENV }}', 'prod')
+    dependsOn: deploy
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: waitForApprovalPROD
+        displayName: waiting for approval
+        pool: server
+        timeoutInMinutes: 4320 # 3 days
+        steps:
+          - task: ManualValidation@0
+            displayName: Manual Approval
+            inputs:
+              onTimeout: "reject"
+
+      - job: completeProdDeployFn
+        displayName: Complete function deploy on production environment
+        dependsOn: waitForApprovalPROD
+        steps:
+          # deploy functions - swap
+          - task: AzureAppServiceManage@0
+            displayName: Swapping App Service Deploy
+            inputs:
+              ConnectedServiceName: $(AZURE_SUBSCRIPTION)
+              WebAppName: "${{variables.APP_NAME}}-shared-authorizer-fn"
+              ResourceGroupName: $(RESOURCE_GROUP)
+              SourceSlot: staging
+              SwapWithProduction: true
+              Slot: production
 
   # Run test
   - stage: test
@@ -243,7 +276,7 @@ stages:
         steps:
           - task: Delay@1
             inputs:
-             delayForMinutes: '5'
+              delayForMinutes: '5'
 
       - job: integrationTests
         dependsOn: waitStartup
@@ -273,4 +306,3 @@ stages:
               export INTEGRTEST_INVALID_SUBKEY=$(INTEGRTEST_INVALID_SUBKEY)
               sh run_integration_test.sh ${{ parameters.ENV }}
             displayName: Run integration test
-
