@@ -17,8 +17,6 @@ public class CacheGenerator {
 
     private final String authorizerPath = System.getenv(Constants.REFRESH_CONFIG_PATH_PARAMETER);
 
-    private HttpClient httpClient;
-
     @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
             @HttpTrigger(
@@ -52,11 +50,9 @@ public class CacheGenerator {
     }
 
     public CacheService getCacheService(Logger logger) {
-        if (this.httpClient == null) {
-            long start = Calendar.getInstance().getTimeInMillis();
-            this.httpClient = HttpClient.newHttpClient();
-            logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
-        }
-        return new CacheService(logger, this.httpClient, authorizerPath);
+        long start = Calendar.getInstance().getTimeInMillis();
+        HttpClient httpClient = HttpClient.newHttpClient();
+        logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
+        return new CacheService(logger, httpClient, authorizerPath);
     }
 }
