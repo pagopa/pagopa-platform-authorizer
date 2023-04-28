@@ -72,6 +72,38 @@ class CacheGeneratorFunctionTest {
         assertEquals(HttpStatus.OK, response.getStatus());
     }
 
+    @SneakyThrows
+    @Test
+    void runOk_nullResponse() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        SubscriptionKeyDomain[] retrievedSubscriptionKeyDomains = getSubscriptionKeyDomains();
+        when(context.getLogger()).thenReturn(logger);
+        when(function.getCacheService(logger)).thenReturn(cacheService);
+
+        // Mocking communication with APIM
+        doReturn(null).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
+
+        // Generating request, mocking the field creation
+        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
+        doReturn(new URI("")).when(request).getUri();
+
+        // Generate mock response mocking the field creation
+        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
+        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
+        doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
+        doReturn(builder).when(builder).header(anyString(), anyString());
+        doReturn(HttpStatus.valueOf(200)).when(responseMock).getStatus();
+        doReturn(responseMock).when(builder).build();
+
+        // Execute function
+        HttpResponseMessage response = function.run(request, retrievedSubscriptionKeyDomains, context);
+
+        // Checking assertions
+        assertEquals(HttpStatus.OK, response.getStatus());
+    }
+
     private SubscriptionKeyDomain[] getSubscriptionKeyDomains() {
         return new SubscriptionKeyDomain[]{
                 SubscriptionKeyDomain.builder()
