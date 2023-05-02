@@ -1,36 +1,27 @@
 package it.gov.pagopa.authorizer;
 
-import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.HttpMethod;
-import com.microsoft.azure.functions.HttpRequestMessage;
-import com.microsoft.azure.functions.HttpResponseMessage;
-import com.microsoft.azure.functions.HttpStatus;
+import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
-
-/**
- * Azure Functions with Azure Http trigger.
- */
 public class Info {
 
-    /**
-     * This function will be invoked when a Http Trigger occurs
-     * @return
-     */
-    @FunctionName("Info")
+    @FunctionName("AuthorizerInfoFunction")
     public HttpResponseMessage run (
-            @HttpTrigger(name = "InfoTrigger",
+            @HttpTrigger(
+                    name = "InfoTrigger",
                     methods = {HttpMethod.GET},
                     route = "info",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context) {
 
-        return request.createResponseBuilder(HttpStatus.OK).build();
+        context.getLogger().log(Level.INFO, "Invoked health check HTTP trigger for pagopa-platform-authorizer.");
+        return request.createResponseBuilder(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .build();
     }
-
-
 }

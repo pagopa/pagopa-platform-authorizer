@@ -12,7 +12,6 @@ import org.mockito.exceptions.base.MockitoException;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -36,103 +35,19 @@ class CacheServiceTest {
     private final Logger logger = Logger.getLogger("example-test-logger");
 
     @Mock
-    DataAccessObject dao;
-
-    @Mock
     HttpClient httpClient;
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationBulkToApimAuthorizer_OK() {
-
-        // Mocking passed values
-        List<SubscriptionKeyDomain> subkeyDomains = getSubscriptionKeyDomains(DOMAIN);
-        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-
-        // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH, dao));
-        doReturn(subkeyDomains).when(dao).findAuthorizationByDomain(DOMAIN);
-        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
-
-        // Execute function
-        cacheService.addAuthConfigurationBulkToApimAuthorizer(DOMAIN);
-
-        // Checking assertions
-        verify(dao, times(1)).findAuthorizationByDomain(anyString());
-        verify(dao, times(1)).close();
-        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        verify(httpClient, times(2)).send(any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationBulkToApimAuthorizer_OK_noElementFoundInDB() {
-
-        // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH, dao));
-        doReturn(List.of()).when(dao).findAuthorizationByDomain(DOMAIN);
-        //doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
-
-        // Execute function
-        cacheService.addAuthConfigurationBulkToApimAuthorizer(DOMAIN);
-
-        // Checking assertions
-        verify(dao, times(1)).findAuthorizationByDomain(anyString());
-        verify(dao, times(1)).close();
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        verify(httpClient, times(0)).send(any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationBulkToApimAuthorizer_KO_communicationError() {
-
-        // Mocking passed values
-        List<SubscriptionKeyDomain> subkeyDomains = getSubscriptionKeyDomains(DOMAIN);
-
-        // Mocking execution for service's internal component
-        HttpClient realHttpClient = spy(HttpClient.newHttpClient());
-        CacheService cacheService = spy(new CacheService(logger, realHttpClient, "https://api.ENV.pagopa.it", dao));
-        doReturn(subkeyDomains).when(dao).findAuthorizationByDomain(DOMAIN);
-
-        // Execute function
-        cacheService.addAuthConfigurationBulkToApimAuthorizer(DOMAIN);
-
-        // Checking assertions
-        verify(dao, times(1)).findAuthorizationByDomain(anyString());
-        verify(dao, times(1)).close();
-        verify(cacheService, times(2)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        verify(realHttpClient, times(2)).send(any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationBulkToApimAuthorizer_KO_invalidParameter() {
-
-        // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH, dao));
-
-        // Execute function
-        assertThrows(IllegalArgumentException.class, () -> cacheService.addAuthConfigurationBulkToApimAuthorizer(null));
-
-        // Checking assertions
-        verify(dao, times(0)).findAuthorizationByDomain(anyString());
-        verify(dao, times(0)).close();
-        verify(cacheService, times(0)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
-        verify(httpClient, times(0)).send(any(), any());
-    }
 
     @SneakyThrows
     @Test
     void addAuthConfigurationToAPIMAuthorizer_OK() {
 
         // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains(DOMAIN).get(0);
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
         String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1,entity2,entity3\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
         // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH, dao));
+        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -149,13 +64,13 @@ class CacheServiceTest {
     void addAuthConfigurationToAPIMAuthorizer_OK_noAuthorizationEntities() {
 
         // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains(DOMAIN).get(0);
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
         subkeyDomain.setAuthorization(List.of());
         String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
         // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH, dao));
+        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -172,12 +87,12 @@ class CacheServiceTest {
     void addAuthConfigurationToAPIMAuthorizer_KO_communicationError() {
 
         // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains(DOMAIN).get(0);
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
         String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1,entity2,entity3\"}";
 
         // Mocking execution for service's internal component
         HttpClient realHttpClient = spy(HttpClient.newHttpClient());
-        CacheService cacheService = spy(new CacheService(logger, realHttpClient, "https://api.ENV.pagopa.it", dao));
+        CacheService cacheService = spy(new CacheService(logger, realHttpClient, "https://api.ENV.pagopa.it"));
 
         // Execute function
         cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
@@ -203,17 +118,17 @@ class CacheServiceTest {
         verify(httpClient, times(0)).send(any(), any());
     }
 
-    private List<SubscriptionKeyDomain> getSubscriptionKeyDomains(String domain) {
+    private List<SubscriptionKeyDomain> getSubscriptionKeyDomains() {
         return List.of(
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
-                        .domain(domain)
+                        .domain(DOMAIN)
                         .subkey("1")
                         .authorization(List.of("entity1", "entity2", "entity3"))
                         .build(),
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
-                        .domain(domain)
+                        .domain(DOMAIN)
                         .subkey("2")
                         .authorization(List.of("entity1", "entity4"))
                         .build()

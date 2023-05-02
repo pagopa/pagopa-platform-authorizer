@@ -1,67 +1,46 @@
 package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.CosmosDBInput;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
+import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.service.DataAccessObject;
+import it.gov.pagopa.authorizer.util.Constants;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
-import java.util.Optional;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CacheNotifier {
 
-    private final String authorizerPath = System.getenv("REFRESH_CONFIGURATION_PATH");
-    private final String cosmosUri = System.getenv("SKEYDOMAINS_COSMOS_URI");
-    private final String cosmosKey = System.getenv("SKEYDOMAINS_COSMOS_KEY");
-    private final String cosmosDB = System.getenv("SKEYDOMAINS_COSMOS_DB");
-    private final String cosmosContainer = System.getenv("SKEYDOMAINS_COSMOS_CONTAINER");
+    private final String authorizerPath = System.getenv(Constants.REFRESH_CONFIG_PATH_PARAMETER);
 
     @FunctionName("CacheNotifierFunction")
-    public HttpResponseMessage run (
-            @HttpTrigger(
+    public void run (
+            @CosmosDBTrigger(
                     name = "CacheNotifierTrigger",
-                    methods = {HttpMethod.GET, HttpMethod.POST},
-                    authLevel = AuthorizationLevel.ANONYMOUS)
-            HttpRequestMessage<Optional<String>> request,
-            @CosmosDBInput(
-                    name = "CacheNotifierInput",
-                    databaseName = "db",
-                    containerName = "authorization",
-                    connection = "COSMOS_CONN_STRING")
-                    // sqlQuery = "%TRIGGER_SQL_QUERY%") TODO temporarly commented
-            Optional<SubscriptionKeyDomain> triggeredSubkeyDomain,
+                    databaseName = "authorizer",
+                    collectionName = "skeydomains",
+                    leaseCollectionName = "authorizer-leases",
+                    createLeaseCollectionIfNotExists = true,
+                    maxItemsPerInvocation=100,
+                    connectionStringSetting = "COSMOS_CONN_STRING"
+            )
+            List<SubscriptionKeyDomain> triggeredSubkeyDomains,
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
         HttpResponse<String> responseContent = null;
 
-        if (triggeredSubkeyDomain.isPresent()) {
-            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain.get(), true);
+        for (SubscriptionKeyDomain triggeredSubkeyDomain : triggeredSubkeyDomains) {
+            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
         }
-
-        int httpStatusCode = responseContent != null ? responseContent.statusCode() : 500;
-        HttpResponseMessage response = request.createResponseBuilder(HttpStatus.valueOf(httpStatusCode))
-                .header("Content-Type", "application/json")
-                .build();
-        logger.log(Level.INFO, "The execution will end with an HTTP status code {0}", httpStatusCode);
-        return response;
+        final int statusCode = responseContent != null ? responseContent.statusCode() : 500;
+        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %s", statusCode));
     }
 
     public CacheService getCacheService(Logger logger) {
-        return new CacheService(logger,
-                HttpClient.newHttpClient(),
-                authorizerPath,
-                getDAO(cosmosUri, cosmosKey, cosmosDB, cosmosContainer));
-    }
-
-    public DataAccessObject getDAO(String uri, String key, String db, String container) {
-        return new DataAccessObject(uri, key, db, container);
+        return new CacheService(logger, HttpClient.newHttpClient(), authorizerPath);
     }
 }
