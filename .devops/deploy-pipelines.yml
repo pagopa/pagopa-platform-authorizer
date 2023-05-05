@@ -48,7 +48,7 @@ variables:
     INTEGRTEST_INVALID_SUBKEY: $(DEV_INTEGRTEST_INVALID_SUBKEY)
 
   ${{ if eq(parameters['ENV'], 'uat') }}:
-    poolImage: 'pagopa-uat-linux'
+    poolImage: 'pagopa-uat-loadtest-linux'
     AZURE_SUBSCRIPTION: $(UAT_AZURE_SUBSCRIPTION)
     APP_NAME: $(UAT_WEB_APP_NAME)
     STAGE: "u"
