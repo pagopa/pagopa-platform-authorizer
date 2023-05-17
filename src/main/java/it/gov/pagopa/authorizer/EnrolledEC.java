@@ -29,13 +29,12 @@ public class EnrolledEC {
             @HttpTrigger(
                     name = "EnrolledECTrigger",
                     methods = {HttpMethod.GET},
-                    route = "api/ec/domain/{domain}",
+                    route = "/organizations/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             @CosmosDBInput(
                     name = "SkeydomainsInput",
                     databaseName = "authorizer",
                     collectionName = "skeydomains",
-                    //sqlQuery = "SELECT VALUE c.authorization FROM c where c.domain = {domain}",
                     sqlQuery = "%EC_SQL_QUERY%",
                     connectionStringSetting = "COSMOS_CONN_STRING"
             ) String[] enrolledECsDomain,
@@ -52,7 +51,7 @@ public class EnrolledEC {
         		.body(distinctResult)
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
-        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
+        logger.log(Level.FINE, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
         return response;
     }
 }

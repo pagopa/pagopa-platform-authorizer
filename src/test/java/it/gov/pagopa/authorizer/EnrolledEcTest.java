@@ -52,7 +52,7 @@ class EnrolledEcTest {
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> requestMock = mock(HttpRequestMessage.class);
-        doReturn(new URI("api/ec/domain/"+DOMAIN)).when(requestMock).getUri();
+        doReturn(new URI("organizations/domains/"+DOMAIN)).when(requestMock).getUri();
         
         // Generate mock response mocking the field creation
         final HttpResponseMessage.Builder builderMock = mock(HttpResponseMessage.Builder.class);
