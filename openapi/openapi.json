@@ -31,7 +31,10 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Operation executed successfully."
+						"description": "Operation executed successfully.",
+						"content": {
+							"application/json": {}
+						}
 					},
 					"429": {
 						"description": "Too many requests"
