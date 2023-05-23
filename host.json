@@ -9,7 +9,6 @@
       "routePrefix": ""
     }
   },
-  "functions": ["EnrolledECFunction"],
   "logging": {
     "fileLoggingMode": "always",
     "logLevel": {
