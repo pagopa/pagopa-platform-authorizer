@@ -1,5 +1,6 @@
 const assert = require("assert");
 const { paymentsHealthCheck, getReceiptList } = require("../clients/payments_client");
+const { getEnrolledEC } = require("../clients/enrolled_ec_client");
 const { debugLog, makeidMix } = require("../utility/helpers");
 const { CosmosClient } = require("@azure/cosmos");
 
@@ -38,8 +39,15 @@ async function executeAuthorizedInvocation(entity, subkeyType, bundle) {
     bundle.response = response;
 }
 
+async function executeGetEnrolledECInvocation(domain, bundle) {
+    console.log(` - When the client execute a call for the domain ${domain}...`);
+    let response = await getEnrolledEC(domain);
+    debugLog(`API invocation returned HTTP status code: ${response?.status}`);
+    bundle.response = response;
+}
+
 async function executeAfterAllStep(bundle) {
-    console.log(` - Deleting authorization with id ${bundle.authorization_id}...`);
+    console.log(` - Deleting authorization with id ${bundle.authorization_id}..`);
     const client = new CosmosClient({ endpoint, key });
     await client.database("authorizer").container("skeydomains").item(bundle.authorization_id, bundle.domain).delete();    
 }
@@ -54,6 +62,17 @@ async function assertStatusCodeNotEquals(response, statusCode) {
     assert.ok(response.status !== statusCode);
 }
 
+async function assertECListIsNotEmpty(response) {
+    console.log(` - Then the client receives a non-empty list..`);
+    assert.strictEqual(1, response.data.length)
+    assert.equal(JSON.parse(response.data), "77777777777");
+}
+
+async function assertECListIsEmpty(response) {
+    console.log(` - Then the client receives an empty list..`);
+    assert.strictEqual(0, response.data.length);
+}
+
 module.exports = {
     assertStatusCodeEquals,
     assertStatusCodeNotEquals,
@@ -61,4 +80,7 @@ module.exports = {
     executeAuthorizedInvocation,
     executeHealthCheckForGPDPayments,
     generateAuthorization,
+    executeGetEnrolledECInvocation,
+    assertECListIsNotEmpty,
+    assertECListIsEmpty
 }
