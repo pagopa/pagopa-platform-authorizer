@@ -1,0 +1,13 @@
+{
+  "creditor_institutions":
+  [
+    {
+      "organization_fiscal_code":"123456",
+      "segregation_codes":["05"]
+    },
+    {
+      "organization_fiscal_code":"789012",
+      "segregation_codes":["05"]
+    }
+  ]
+}
