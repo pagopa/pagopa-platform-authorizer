@@ -8,7 +8,7 @@ public class Constants {
 
     public static final String AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE = "%s/cache/domains/{domain}?add_in_progress=%s";
 
-    public static final String GET_SEGREGATIONCODE_PATH_TEMPLATE = "%s/creditorinstitutions/{creditorInstitutionCode}/segregationcodes";
+    public static final String GET_SEGREGATIONCODE_PATH_TEMPLATE = "%s/creditorinstitutions/{creditorInstitutionCode}/segregationcodes?service={service}";
 
     public static final String REFRESH_CONFIG_PATH_PARAMETER = "REFRESH_CONFIGURATION_PATH";
 
@@ -20,6 +20,8 @@ public class Constants {
             // insert here other static mapping from domain to service URI
             Map.entry("gpd", "gpd-payments/api/v1")
     );
+
+    public static final String CONTENT_TYPE = "Content-Type";
 
 
     private Constants() {}

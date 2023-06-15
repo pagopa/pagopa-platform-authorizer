@@ -35,7 +35,7 @@ public class EnrollingService {
         this.apiconfigPath = getSegregationCodesPath;
     }
 
-    public EnrolledCreditorInstitutions getEnrolledCI(String[] enrolledECsDomain) throws InterruptedException, IOException, URISyntaxException {
+    public EnrolledCreditorInstitutions getEnrolledCI(String[] enrolledECsDomain, String domain) throws InterruptedException, IOException, URISyntaxException, IllegalArgumentException {
         List<EnrolledCreditorInstitution> enrolledCreditorInstitutions = new ArrayList<>();
         List<String> distinctEnrolledECs = Arrays.stream(enrolledECsDomain)
                 .distinct()
@@ -43,7 +43,12 @@ public class EnrollingService {
                 .collect(Collectors.toList());
 
         ObjectMapper mapper = new ObjectMapper();
+        String serviceUrl = Constants.DOMAIN_TO_SERVICE_URI_MAPPING.get(domain);
+        if (serviceUrl == null) {
+            throw new IllegalArgumentException(String.format("No valid service mapping for domain %s", domain));
+        }
         String apiconfigRawPath = String.format(Constants.GET_SEGREGATIONCODE_PATH_TEMPLATE, this.apiconfigPath);
+        apiconfigRawPath = apiconfigRawPath.replace("{service}", serviceUrl);
 
         for (String enrolledEC : distinctEnrolledECs) {
 

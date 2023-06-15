@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EnrollingServiceTest {
 
-    private static final String DOMAIN = "domain";
+    private static final String DOMAIN = "gpd";
 
     private static final String SPICONFIG_PATH = "http://fake.apiconfig.path.org";
 
@@ -57,7 +57,7 @@ class EnrollingServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs);
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
         String actual = mapper.writeValueAsString(result);
         String expected = readJsonFromFile("response/enrolling_ok1.json");
 
@@ -84,7 +84,7 @@ class EnrollingServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs);
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
         String actual = mapper.writeValueAsString(result);
         String expected = readJsonFromFile("response/enrolling_ok1.json");
 
@@ -111,7 +111,7 @@ class EnrollingServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs);
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
         String actual = mapper.writeValueAsString(result);
         String expected = readJsonFromFile("response/enrolling_ok1.json");
 
@@ -137,7 +137,7 @@ class EnrollingServiceTest {
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
-        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs);
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
         String actual = mapper.writeValueAsString(result);
         String expected = readJsonFromFile("response/enrolling_ok2.json");
 
@@ -158,7 +158,7 @@ class EnrollingServiceTest {
         EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
 
         // Execute function
-        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs);
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
         String actual = mapper.writeValueAsString(result);
         String expected = readJsonFromFile("response/enrolling_ok2.json");
 
@@ -180,7 +180,26 @@ class EnrollingServiceTest {
         EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it"));
 
         // Execute function
-        assertThrows(IOException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs));
+        assertThrows(IOException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs, DOMAIN));
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(0)).send(requestCaptor.capture(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    void getEnrolledCI_notRegisteredDomain_KO() {
+
+        // Mocking passed values
+        String[] enrolledECs = new String[]{"123456", "789012"};
+
+        // Mocking execution for service's internal component
+        HttpClient realHttpClient = spy(HttpClient.newHttpClient());
+        EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it"));
+
+        // Execute function
+        assertThrows(IllegalArgumentException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs, "nonexistingdomain"));
 
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);

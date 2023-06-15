@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.model.EnrolledCreditorInstitutions;
 import it.gov.pagopa.authorizer.model.ProblemJson;
 import it.gov.pagopa.authorizer.service.EnrollingService;
@@ -21,10 +22,6 @@ import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
-import com.microsoft.azure.functions.annotation.CosmosDBInput;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 
 public class EnrolledEC {
@@ -45,6 +42,7 @@ public class EnrolledEC {
                     sqlQuery = "%EC_SQL_QUERY%",
                     connectionStringSetting = "COSMOS_CONN_STRING"
             ) String[] enrolledECsDomain,
+            @BindingName("domain") String domain,
             final ExecutionContext context) throws InterruptedException {
 
     	Instant start = Instant.now();
@@ -54,18 +52,24 @@ public class EnrolledEC {
         HttpResponseMessage response;
         try {
             EnrollingService enrollingService = getEnrollingService(logger);
-            EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECsDomain);
+            EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECsDomain, domain);
             response = request.createResponseBuilder(HttpStatus.OK)
                     .body(result)
-                    .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .build();
             logger.log(Level.FINE, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
         } catch (URISyntaxException | IOException e) {
             response = request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ProblemJson.builder().status(500).title("Communication error").detail("Error during communication with APIConfig for segregation codes retrieving.").build())
-                    .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .build();
             logger.log(Level.SEVERE, "An error occurred while trying to calling APIConfig \"get segregation codes\" API. ", e);
+        }  catch (IllegalArgumentException e) {
+            response = request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .body(ProblemJson.builder().status(400).title("Invalid domain").detail(e.getMessage()).build())
+                    .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .build();
+            logger.log(Level.SEVERE, "An error occurred while get the service URL mapping from passed domain. ", e);
         }
         return response;
     }
