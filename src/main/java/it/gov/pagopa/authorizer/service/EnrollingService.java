@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class EnrollingService {
 
-    private final String apiconfigSubkey = System.getenv(Constants.APICONFIG_SELFCARE_INTEGRATION_SUBKEY_PARAMETER);
+    private final String apiconfigSubkey;
 
     private final String apiconfigPath;
 
@@ -32,10 +32,11 @@ public class EnrollingService {
 
 
 
-    public EnrollingService(Logger logger, HttpClient httpClient, String getSegregationCodesPath) {
+    public EnrollingService(Logger logger, HttpClient httpClient, String getSegregationCodesPath, String apiconfigSubkey) {
         this.logger = logger;
         this.httpClient = httpClient;
         this.apiconfigPath = getSegregationCodesPath;
+        this.apiconfigSubkey = apiconfigSubkey;
     }
 
     public EnrolledCreditorInstitutions getEnrolledCI(String[] enrolledECsDomain, String domain) throws InterruptedException, IOException, URISyntaxException, IllegalArgumentException {
@@ -60,7 +61,7 @@ public class EnrollingService {
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)
-                    .header("Ocp-Apim-Subscription-Key", apiconfigSubkey)
+                    .header("Ocp-Apim-Subscription-Key", this.apiconfigSubkey)
                     .GET()
                     .build();
             HttpResponse<String> apiconfigResponse = this.httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());

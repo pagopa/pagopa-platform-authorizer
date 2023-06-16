@@ -28,6 +28,8 @@ public class EnrolledEC {
 
     private final String apiconfigPath = System.getenv(Constants.APICONFIG_SELFCARE_INTEGRATION_PATH_PARAMETER);
 
+    private final String apiconfigSubkey = System.getenv(Constants.APICONFIG_SELFCARE_INTEGRATION_SUBKEY_PARAMETER);
+
     @FunctionName("EnrolledECFunction")
     public HttpResponseMessage run (
             @HttpTrigger(
@@ -78,6 +80,6 @@ public class EnrolledEC {
         long start = Calendar.getInstance().getTimeInMillis();
         HttpClient httpClient = HttpClient.newHttpClient();
         logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
-        return new EnrollingService(logger, httpClient, apiconfigPath);
+        return new EnrollingService(logger, httpClient, apiconfigPath, apiconfigSubkey);
     }
 }

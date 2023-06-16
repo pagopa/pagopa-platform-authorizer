@@ -31,7 +31,9 @@ class EnrollingServiceTest {
 
     private static final String DOMAIN = "gpd";
 
-    private static final String SPICONFIG_PATH = "http://fake.apiconfig.path.org";
+    private static final String APICONFIG_PATH = "http://fake.apiconfig.path.org";
+
+    private static final String APICONFIG_SUBKEY = "fakesubkey";
 
     private final Logger logger = Logger.getLogger("example-test-logger");
 
@@ -53,7 +55,7 @@ class EnrollingServiceTest {
                 .build();
 
         // Mocking execution for service's internal component
-        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -80,7 +82,7 @@ class EnrollingServiceTest {
                 .build();
 
         // Mocking execution for service's internal component
-        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -107,7 +109,7 @@ class EnrollingServiceTest {
                 .build();
 
         // Mocking execution for service's internal component
-        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -133,7 +135,7 @@ class EnrollingServiceTest {
                 .build();
 
         // Mocking execution for service's internal component
-        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
         doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
 
         // Execute function
@@ -155,7 +157,7 @@ class EnrollingServiceTest {
         String[] enrolledECs = new String[]{};
 
         // Mocking execution for service's internal component
-        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, SPICONFIG_PATH));
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
 
         // Execute function
         EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
@@ -177,7 +179,7 @@ class EnrollingServiceTest {
 
         // Mocking execution for service's internal component
         HttpClient realHttpClient = spy(HttpClient.newHttpClient());
-        EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it"));
+        EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it", APICONFIG_SUBKEY));
 
         // Execute function
         assertThrows(IOException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs, DOMAIN));
@@ -196,7 +198,7 @@ class EnrollingServiceTest {
 
         // Mocking execution for service's internal component
         HttpClient realHttpClient = spy(HttpClient.newHttpClient());
-        EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it"));
+        EnrollingService realEnrollingService = spy(new EnrollingService(logger, realHttpClient, "https://api.ENV.pagopa.it", APICONFIG_SUBKEY));
 
         // Execute function
         assertThrows(IllegalArgumentException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs, "nonexistingdomain"));
