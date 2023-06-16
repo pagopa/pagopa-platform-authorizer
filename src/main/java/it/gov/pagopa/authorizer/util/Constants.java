@@ -12,7 +12,7 @@ public class Constants {
 
     public static final String REFRESH_CONFIG_PATH_PARAMETER = "REFRESH_CONFIGURATION_PATH";
 
-    public static final String APICONFIG_PATH_PARAMETER = "APICONFIG_PATH";
+    public static final String APICONFIG_SELFCARE_INTEGRATION_PATH_PARAMETER = "APICONFIG_SELFCARE_INTEGRATION_PATH";
 
     public static final String WILDCARD_CHARACTER = "*";
 

@@ -26,7 +26,7 @@ import com.microsoft.azure.functions.HttpStatus;
 
 public class EnrolledEC {
 
-    private final String apiconfigPath = System.getenv(Constants.APICONFIG_PATH_PARAMETER);
+    private final String apiconfigPath = System.getenv(Constants.APICONFIG_SELFCARE_INTEGRATION_PATH_PARAMETER);
 
     @FunctionName("EnrolledECFunction")
     public HttpResponseMessage run (
