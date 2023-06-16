@@ -53,7 +53,7 @@ public class EnrollingService {
 
         for (String enrolledEC : distinctEnrolledECs) {
             // extracting path for API call
-            this.logger.log(Level.INFO, () -> String.format("Analyzing creditor institution with fiscal code [%s]: check if is enrolled to the domain [%s]", enrolledEC, domain);
+            this.logger.log(Level.INFO, () -> String.format("Analyzing creditor institution with fiscal code [%s]: check if is enrolled to the domain [%s]", enrolledEC, domain));
             String refactoredAuthorizerPath = apiconfigRawPath.replace("{creditorInstitutionCode}", enrolledEC);
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
@@ -61,7 +61,7 @@ public class EnrollingService {
                     .GET()
                     .build();
             HttpResponse<String> apiconfigResponse = this.httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            this.logger.log(Level.INFO, () -> String.format("Communication with APIConfig ended, returned HTTP status code [%s] and body [%s]", apiconfigResponse.statusCode(), apiconfigResponse.body());
+            this.logger.log(Level.INFO, () -> String.format("Communication with APIConfig ended, returned HTTP status code [%s] and body [%s]", apiconfigResponse.statusCode(), apiconfigResponse.body()));
             // check if is retrieved a valid response and generate the list of codes
             if (apiconfigResponse.statusCode() == 200) {
                 CIAssociatedCodeList ciAssociatedCodeList = mapper.readValue(apiconfigResponse.body(), CIAssociatedCodeList.class);
@@ -73,7 +73,7 @@ public class EnrollingService {
                                         .collect(Collectors.toList()))
                                 .build()
                 );
-                this.logger.log(Level.INFO, () -> String.format("Retrieved the following list of used segregation codes for creditor institution with fiscal code [%s]: [%s]", enrolledEC, apiconfigResponse.statusCode());
+                this.logger.log(Level.INFO, () -> String.format("Retrieved the following list of used segregation codes for creditor institution with fiscal code [%s]: [%s]", enrolledEC, apiconfigResponse.statusCode()));
             }
         }
 
