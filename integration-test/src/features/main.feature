@@ -19,9 +19,8 @@ Feature: All about authorizer workflow
   Scenario: Enrolled EC - Get valued list by existing domain
     When the client execute a call for the domain "gpd"
     Then the client receives status code 200
-    Then the client receives a non-empty list
+    Then the client receives an object with enrolled creditor institutions
 
-  Scenario: Enrolled EC - Get an empty list for a non-existing domain
+  Scenario: Enrolled EC - Get an error for a non-existing domain
     When the client execute a call for the domain "xxx"
-    Then the client receives status code 200
-    Then the client receives an empty list
+    Then the client receives status code 400

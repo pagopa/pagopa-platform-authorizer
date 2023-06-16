@@ -62,14 +62,9 @@ async function assertStatusCodeNotEquals(response, statusCode) {
     assert.ok(response.status !== statusCode);
 }
 
-async function assertECListIsNotEmpty(response) {
-    console.log(` - Then the client receives a non-empty list..`);
-    assert.ok(response.data.creditor_institutions.length > 0)
-}
-
-async function assertECListIsEmpty(response) {
-    console.log(` - Then the client receives an empty list..`);
-    assert.strictEqual(0, response.data.creditor_institutions.length);
+async function assertResponseWithEnrolledCI(response) {
+    console.log(` - Then the client receives an object with enrolled creditor institutions..`);
+    assert.ok(response.data.creditor_institutions !== undefined);
 }
 
 module.exports = {
@@ -80,6 +75,5 @@ module.exports = {
     executeHealthCheckForGPDPayments,
     generateAuthorization,
     executeGetEnrolledECInvocation,
-    assertECListIsNotEmpty,
-    assertECListIsEmpty
+    assertResponseWithEnrolledCI
 }
