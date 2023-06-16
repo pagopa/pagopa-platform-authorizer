@@ -64,13 +64,12 @@ async function assertStatusCodeNotEquals(response, statusCode) {
 
 async function assertECListIsNotEmpty(response) {
     console.log(` - Then the client receives a non-empty list..`);
-    assert.strictEqual(1, response.data.length)
-    assert.equal(JSON.parse(response.data), "77777777777");
+    assert.ok(response.data.creditor_institutions.length > 0)
 }
 
 async function assertECListIsEmpty(response) {
     console.log(` - Then the client receives an empty list..`);
-    assert.strictEqual(0, response.data.length);
+    assert.strictEqual(0, response.data.creditor_institutions.length);
 }
 
 module.exports = {
