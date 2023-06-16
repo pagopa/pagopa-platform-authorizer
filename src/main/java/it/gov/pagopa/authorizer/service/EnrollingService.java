@@ -69,14 +69,17 @@ public class EnrollingService {
             // check if is retrieved a valid response and generate the list of codes
             if (apiconfigResponse.statusCode() == 200) {
                 CIAssociatedCodeList ciAssociatedCodeList = mapper.readValue(apiconfigResponse.body(), CIAssociatedCodeList.class);
-                enrolledCreditorInstitutions.add(
-                        EnrolledCreditorInstitution.builder()
-                                .organizationFiscalCode(enrolledEC)
-                                .segregationCodes(ciAssociatedCodeList.getUsedCodes().stream()
-                                        .map(CIAssociatedCode::getCode)
-                                        .collect(Collectors.toList()))
-                                .build()
-                );
+                List<CIAssociatedCode> usedCodes = ciAssociatedCodeList.getUsedCodes();
+                if (!usedCodes.isEmpty()) {
+                    enrolledCreditorInstitutions.add(
+                            EnrolledCreditorInstitution.builder()
+                                    .organizationFiscalCode(enrolledEC)
+                                    .segregationCodes(usedCodes.stream()
+                                            .map(CIAssociatedCode::getCode)
+                                            .collect(Collectors.toList()))
+                                    .build()
+                    );
+                }
                 this.logger.log(Level.INFO, () -> String.format("Retrieved the following list of used segregation codes for creditor institution with fiscal code [%s]: [%s]", enrolledEC, apiconfigResponse.statusCode()));
             }
         }

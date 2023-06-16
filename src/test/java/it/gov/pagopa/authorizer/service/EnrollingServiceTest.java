@@ -125,6 +125,33 @@ class EnrollingServiceTest {
 
     @SneakyThrows
     @Test
+    void getEnrolledCI_excludeCIWithNoSegregationCode_OK() {
+
+        // Mocking passed values
+        String[] enrolledECs = new String[]{"123456", "789012"};
+        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder()
+                .statusCode(200)
+                .uri(new URI(""))
+                .body(readJsonFromFile("request/apiconfig_getsegregationcodes_ok2.json"))
+                .build();
+
+        // Mocking execution for service's internal component
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
+
+        // Execute function
+        EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECs, DOMAIN);
+        String actual = mapper.writeValueAsString(result);
+        String expected = readJsonFromFile("response/enrolling_ok2.json");
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(Arrays.stream(enrolledECs).collect(Collectors.toSet()).size())).send(requestCaptor.capture(), any());
+        assertEquals(mapper.readTree(expected), mapper.readTree(actual));
+    }
+
+    @SneakyThrows
+    @Test
     void getEnrolledCI_invalidCI_OK() {
 
         // Mocking passed values
