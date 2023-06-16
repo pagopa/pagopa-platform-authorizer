@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 public class EnrollingService {
 
+    private final String apiconfigSubkey = System.getenv(Constants.APICONFIG_SELFCARE_INTEGRATION_SUBKEY_PARAMETER);
+
     private final String apiconfigPath;
 
     private final Logger logger;
@@ -58,6 +60,7 @@ public class EnrollingService {
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)
+                    .header("Ocp-Apim-Subscription-Key", apiconfigSubkey)
                     .GET()
                     .build();
             HttpResponse<String> apiconfigResponse = this.httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
