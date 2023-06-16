@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.model.EnrolledCreditorInstitutions;
 import it.gov.pagopa.authorizer.model.ProblemJson;
@@ -56,7 +57,7 @@ public class EnrolledEC {
             EnrollingService enrollingService = getEnrollingService(logger);
             EnrolledCreditorInstitutions result = enrollingService.getEnrolledCI(enrolledECsDomain, domain);
             response = request.createResponseBuilder(HttpStatus.OK)
-                    .body(result)
+                    .body(new ObjectMapper().writeValueAsString(result))
                     .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .build();
             logger.log(Level.FINE, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
