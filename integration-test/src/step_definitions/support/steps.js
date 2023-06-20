@@ -7,8 +7,7 @@ const {
     executeHealthCheckForGPDPayments, 
     generateAuthorization,
     executeGetEnrolledECInvocation,
-    assertECListIsNotEmpty,
-    assertECListIsEmpty 
+    assertResponseWithEnrolledCI
 } = require('./logic/common_logic');
 
 
@@ -30,8 +29,7 @@ When('the client execute a call for entity {string} with subscription key {strin
 When('the client execute a call for the domain {string}', (domain) => executeGetEnrolledECInvocation(domain, bundle));
 Then('the client receives status code {int}', (statusCode) => assertStatusCodeEquals(bundle.response, statusCode));
 Then('the client receives status code different from {int}', (statusCode) => assertStatusCodeNotEquals(bundle.response, statusCode));
-Then('the client receives a non-empty list', () => assertECListIsNotEmpty(bundle.response));
-Then('the client receives an empty list', () => assertECListIsEmpty(bundle.response));
+Then('the client receives an object with enrolled creditor institutions', () => assertResponseWithEnrolledCI(bundle.response));
 
 
 Before(function(scenario) {
