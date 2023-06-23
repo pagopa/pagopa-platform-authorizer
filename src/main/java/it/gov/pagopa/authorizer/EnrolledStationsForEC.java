@@ -63,6 +63,7 @@ public class EnrolledStationsForEC {
             }
             // check if is really enrolled, i.e. has valid enrolled station for the domain service
             if (!isECCorrectlyEnrolled) {
+                status = HttpStatus.NOT_FOUND;
                 body = ProblemJson.builder()
                         .status(status.value())
                         .title("Invalid creditor institution")
@@ -89,7 +90,7 @@ public class EnrolledStationsForEC {
                 .body(body)
                 .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
-        logger.log(Level.FINE, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
+        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
         return response;
     }
 
