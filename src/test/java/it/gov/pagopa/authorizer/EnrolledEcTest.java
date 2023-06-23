@@ -75,7 +75,6 @@ class EnrolledEcTest {
         // Checking assertions
         assertEquals(HttpStatus.OK, response.getStatus());
         assertNotNull(response.getBody());
-        System.out.println(response);
     }
 
     @SneakyThrows
@@ -112,7 +111,6 @@ class EnrolledEcTest {
         // Checking assertions
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatus());
         assertNotNull(response.getBody());
-        System.out.println(response);
     }
 
     @SneakyThrows
@@ -149,7 +147,6 @@ class EnrolledEcTest {
         // Checking assertions
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
         assertNotNull(response.getBody());
-        System.out.println(response);
     }
     
     private String[] getEnrolledEC() {

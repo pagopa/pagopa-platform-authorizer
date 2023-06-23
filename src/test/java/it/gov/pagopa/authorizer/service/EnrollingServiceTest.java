@@ -1,6 +1,7 @@
 package it.gov.pagopa.authorizer.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.gov.pagopa.authorizer.model.EnrolledCreditorInstitutionStations;
 import it.gov.pagopa.authorizer.model.EnrolledCreditorInstitutions;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.*;
 class EnrollingServiceTest {
 
     private static final String DOMAIN = "gpd";
+
+    private static final String CREDITOR_INSTITUTION = "77777777777";
 
     private static final String APICONFIG_PATH = "http://fake.apiconfig.path.org";
 
@@ -66,6 +69,32 @@ class EnrollingServiceTest {
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
         verify(httpClient, times(enrolledECs.length)).send(requestCaptor.capture(), any());
+        assertEquals(mapper.readTree(expected), mapper.readTree(actual));
+    }
+
+    @SneakyThrows
+    @Test
+    void getStationForEC_allValid_OK() {
+
+        // Mocking passed values
+        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder()
+                .statusCode(200)
+                .uri(new URI(""))
+                .body(readJsonFromFile("request/apiconfig_getsegregationcodes_ok1.json"))
+                .build();
+
+        // Mocking execution for service's internal component
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
+
+        // Execute function
+        EnrolledCreditorInstitutionStations result = enrollingService.getStationForEC(CREDITOR_INSTITUTION, DOMAIN);
+        String actual = mapper.writeValueAsString(result);
+        String expected = readJsonFromFile("response/enrolling_station_ok1.json");
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
         assertEquals(mapper.readTree(expected), mapper.readTree(actual));
     }
 
@@ -199,6 +228,32 @@ class EnrollingServiceTest {
 
     @SneakyThrows
     @Test
+    void getStationForEC_noSegregationCodeFound_OK() {
+
+        // Mocking passed values
+        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder()
+                .statusCode(200)
+                .uri(new URI(""))
+                .body(readJsonFromFile("request/apiconfig_getsegregationcodes_ok2.json"))
+                .build();
+
+        // Mocking execution for service's internal component
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
+
+        // Execute function
+        EnrolledCreditorInstitutionStations result = enrollingService.getStationForEC(CREDITOR_INSTITUTION, DOMAIN);
+        String actual = mapper.writeValueAsString(result);
+        String expected = readJsonFromFile("response/enrolling_station_ok2.json");
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
+        assertEquals(mapper.readTree(expected), mapper.readTree(actual));
+    }
+
+    @SneakyThrows
+    @Test
     void getEnrolledCI_communicationError_KO() {
 
         // Mocking passed values
@@ -229,6 +284,36 @@ class EnrollingServiceTest {
 
         // Execute function
         assertThrows(IllegalArgumentException.class, () -> realEnrollingService.getEnrolledCI(enrolledECs, "nonexistingdomain"));
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(0)).send(requestCaptor.capture(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    void getStationForEC_passedWildcard_KO() {
+
+        // Mocking execution for service's internal component
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+
+        // Execute function
+        assertThrows(IllegalArgumentException.class, () -> enrollingService.getStationForEC("*", DOMAIN));
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(0)).send(requestCaptor.capture(), any());
+    }
+
+    @SneakyThrows
+    @Test
+    void getStationForEC_notRegisteredDomain_KO() {
+
+        // Mocking execution for service's internal component
+        EnrollingService realEnrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+
+        // Execute function
+        assertThrows(IllegalArgumentException.class, () -> realEnrollingService.getStationForEC(CREDITOR_INSTITUTION, "nonexistingdomain"));
 
         // Checking assertions
         ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
