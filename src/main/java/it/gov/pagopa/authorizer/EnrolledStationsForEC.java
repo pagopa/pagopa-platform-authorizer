@@ -52,7 +52,7 @@ public class EnrolledStationsForEC {
 
         boolean isECCorrectlyEnrolled = enrolledCICount[0] != 0;
         Logger logger = context.getLogger();
-        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: Is CI enrolled? [%s].", request.getUri().getPath(), isECCorrectlyEnrolled));
+        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: Is CI enrolled? [%s].", request.getUri().getPath(), enrolledCICount[0] != 0));
         HttpResponseMessage response;
         try {
             if (isECCorrectlyEnrolled) {
