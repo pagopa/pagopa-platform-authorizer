@@ -45,27 +45,29 @@ public class EnrolledStationsForEC {
             @BindingName("domain") String domain,
             final ExecutionContext context) throws InterruptedException {
 
-        Object body;
+        Object body = null;
         HttpStatus status = HttpStatus.OK;
 
     	Instant start = Instant.now();
 
-        boolean isECEnrolled = enrolledCICount[0] != 0;
+        boolean isECCorrectlyEnrolled = enrolledCICount[0] != 0;
         Logger logger = context.getLogger();
-        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: Is CI enrolled? [%s].", request.getUri().getPath(), isECEnrolled));
+        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: Is CI enrolled? [%s].", request.getUri().getPath(), isECCorrectlyEnrolled));
         HttpResponseMessage response;
         try {
-            if (!isECEnrolled) {
-                status = HttpStatus.NOT_FOUND;
+            if (isECCorrectlyEnrolled) {
+                EnrollingService enrollingService = getEnrollingService(logger);
+                EnrolledCreditorInstitutionStations result = enrollingService.getStationForEC(organizationFiscalCode, domain);
+                isECCorrectlyEnrolled = !result.getStations().isEmpty();
+                body = new ObjectMapper().writeValueAsString(result);
+            }
+            // check if is really enrolled, i.e. has valid enrolled station for the domain service
+            if (!isECCorrectlyEnrolled) {
                 body = ProblemJson.builder()
                         .status(status.value())
                         .title("Invalid creditor institution")
-                        .detail(String.format("No enrolled creditor institution is found with fiscal code %s.", organizationFiscalCode))
+                        .detail(String.format("No creditor institution with fiscal code %s is enrolled to domain %s and/or has valid registered stations.", organizationFiscalCode, domain))
                         .build();
-            } else {
-                EnrollingService enrollingService = getEnrollingService(logger);
-                EnrolledCreditorInstitutionStations result = enrollingService.getStationForEC(organizationFiscalCode, domain);
-                body = new ObjectMapper().writeValueAsString(result);
             }
         } catch (URISyntaxException | IOException e) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;

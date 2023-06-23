@@ -15,7 +15,7 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnrolledCreditorInstitutionStation {
 
-    @JsonProperty("stationId")
+    @JsonProperty("station_id")
     private String stationId;
 
     @JsonProperty("segregation_code")
