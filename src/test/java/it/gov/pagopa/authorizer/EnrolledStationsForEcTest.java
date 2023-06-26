@@ -171,7 +171,7 @@ class EnrolledStationsForEcTest {
         );
 
         // Mocking Cosmos Db query result
-        Integer[] countOfEnrolledEC = this.getCountOfEnrolledEC();
+        Integer[] countOfEnrolledEC = this.getCountOfNotEnrolledEC();
 
         // Generating request, mocking the field creation
         HttpRequestMessage<Optional<String>> requestMock = mock(HttpRequestMessage.class);
@@ -198,5 +198,9 @@ class EnrolledStationsForEcTest {
     
     private Integer[] getCountOfEnrolledEC() {
         return new Integer[] { 1 };
+    }
+
+    private Integer[] getCountOfNotEnrolledEC() {
+        return new Integer[] { 0 };
     }
 }

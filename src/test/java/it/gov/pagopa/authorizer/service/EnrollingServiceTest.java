@@ -228,6 +228,32 @@ class EnrollingServiceTest {
 
     @SneakyThrows
     @Test
+    void getStationForEC_invalidCI_OK() {
+
+        // Mocking passed values
+        String[] enrolledECs = new String[]{"notfound"};
+        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder()
+                .statusCode(404)
+                .uri(new URI(""))
+                .build();
+
+        // Mocking execution for service's internal component
+        EnrollingService enrollingService = spy(new EnrollingService(logger, httpClient, APICONFIG_PATH, APICONFIG_SUBKEY));
+        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
+
+        // Execute function
+        EnrolledCreditorInstitutionStations result = enrollingService.getStationForEC(CREDITOR_INSTITUTION, DOMAIN);
+        String actual = mapper.writeValueAsString(result);
+        String expected = readJsonFromFile("response/enrolling_station_ok2.json");
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
+        assertEquals(mapper.readTree(expected), mapper.readTree(actual));
+    }
+
+    @SneakyThrows
+    @Test
     void getStationForEC_noSegregationCodeFound_OK() {
 
         // Mocking passed values
