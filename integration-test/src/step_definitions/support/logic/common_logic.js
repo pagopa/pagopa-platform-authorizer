@@ -1,6 +1,6 @@
 const assert = require("assert");
 const { paymentsHealthCheck, getReceiptList } = require("../clients/payments_client");
-const { getEnrolledEC } = require("../clients/enrolled_ec_client");
+const { getEnrolledEC, getEnrolledStationForEC } = require("../clients/enrolled_ec_client");
 const { debugLog, makeidMix } = require("../utility/helpers");
 const { CosmosClient } = require("@azure/cosmos");
 
@@ -46,6 +46,13 @@ async function executeGetEnrolledECInvocation(domain, bundle) {
     bundle.response = response;
 }
 
+async function executeGetEnrolledStationsForECInvocation(domain, creditorInstitutionCode, bundle) {
+    console.log(` - When the client execute a call for the domain ${domain} for entity ${creditorInstitutionCode}...`);
+    let response = await getEnrolledStationForEC(domain, creditorInstitutionCode);
+    debugLog(`API invocation returned HTTP status code: ${response?.status}`);
+    bundle.response = response;
+}
+
 async function executeAfterAllStep(bundle) {
     console.log(` - Deleting authorization with id ${bundle.authorization_id}..`);
     const client = new CosmosClient({ endpoint, key });
@@ -67,6 +74,11 @@ async function assertResponseWithEnrolledCI(response) {
     assert.ok(response.data.creditor_institutions !== undefined);
 }
 
+async function assertResponseWithEnrolledStations(response) {
+    console.log(` - Then the client receives an object with enrolled stations for creditor institution..`);
+    assert.ok(response.data.stations.length > 0);
+}
+
 module.exports = {
     assertStatusCodeEquals,
     assertStatusCodeNotEquals,
@@ -75,5 +87,7 @@ module.exports = {
     executeHealthCheckForGPDPayments,
     generateAuthorization,
     executeGetEnrolledECInvocation,
-    assertResponseWithEnrolledCI
+    executeGetEnrolledStationsForECInvocation,
+    assertResponseWithEnrolledCI,
+    assertResponseWithEnrolledStations
 }

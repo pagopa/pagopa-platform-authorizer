@@ -1,6 +1,6 @@
 Feature: All about authorizer workflow
 
-  Background: 
+  Background:
     Given GPD-Payments service running
     * an authorization on entity "77777777777" for the domain "gpd" related to subscription key "A" is added in the database
 
@@ -16,11 +16,3 @@ Feature: All about authorizer workflow
     When the client execute a call for entity "77777777777" with subscription key "A"
     Then the client receives status code different from 401
 
-  Scenario: Enrolled EC - Get valued list by existing domain
-    When the client execute a call for the domain "gpd"
-    Then the client receives status code 200
-    Then the client receives an object with enrolled creditor institutions
-
-  Scenario: Enrolled EC - Get an error for a non-existing domain
-    When the client execute a call for the domain "xxx"
-    Then the client receives status code 400

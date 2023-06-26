@@ -60,7 +60,7 @@ public class EnrolledEC {
                     .body(new ObjectMapper().writeValueAsString(result))
                     .header(Constants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .build();
-            logger.log(Level.FINE, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
+            logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %d and duration time %d ms", HttpStatus.OK.value(), Duration.between(start, Instant.now()).toMillis()));
         } catch (URISyntaxException | IOException e) {
             response = request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ProblemJson.builder().status(500).title("Communication error").detail("Error during communication with APIConfig for segregation codes retrieving.").build())
