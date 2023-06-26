@@ -191,6 +191,46 @@ class EnrolledStationsForEcTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatus());
         assertNotNull(response.getBody());
     }
+
+    @SneakyThrows
+    @Test
+    void runNotFoundEmptyList() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        when(context.getLogger()).thenReturn(logger);
+        when(function.getEnrollingService(logger)).thenReturn(enrollingService);
+        when(enrollingService.getStationForEC(anyString(), anyString())).thenReturn(
+                EnrolledCreditorInstitutionStations.builder()
+                        .stations(List.of())
+                        .build()
+        );
+
+        // Mocking Cosmos Db query result
+        Integer[] countOfEnrolledEC = this.getCountOfEnrolledEC();
+
+        // Generating request, mocking the field creation
+        HttpRequestMessage<Optional<String>> requestMock = mock(HttpRequestMessage.class);
+        doReturn(new URI(String.format("organizations/%s/domains/%s", CREDITOR_INSTITUTION, DOMAIN))).when(requestMock).getUri();
+
+        // Generate mock response mocking the field creation
+        final HttpResponseMessage.Builder builderMock = mock(HttpResponseMessage.Builder.class);
+        doReturn(builderMock).when(requestMock).createResponseBuilder(any(HttpStatus.class));
+        doReturn(builderMock).when(builderMock).header(anyString(), anyString());
+        doReturn(builderMock).when(builderMock).body(any());
+
+        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
+        doReturn(HttpStatus.NOT_FOUND).when(responseMock).getStatus();
+        doReturn(Arrays.asList(countOfEnrolledEC)).when(responseMock).getBody();
+        doReturn(responseMock).when(builderMock).build();
+
+        // Execute function
+        HttpResponseMessage response = function.run(requestMock, countOfEnrolledEC, CREDITOR_INSTITUTION, DOMAIN, context);
+
+        // Checking assertions
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatus());
+        assertNotNull(response.getBody());
+    }
     
     private Integer[] getCountOfEnrolledEC() {
         return new Integer[] { 1 };
