@@ -165,10 +165,6 @@ class EnrolledStationsForEcTest {
         // Mocking service creation
         Logger logger = Logger.getLogger("example-test-logger");
         when(context.getLogger()).thenReturn(logger);
-        when(function.getEnrollingService(logger)).thenReturn(enrollingService);
-        when(enrollingService.getStationForEC(anyString(), anyString())).thenReturn(
-                EnrolledCreditorInstitutionStations.builder().stations(new ArrayList<>()).build()
-        );
 
         // Mocking Cosmos Db query result
         Integer[] countOfEnrolledEC = this.getCountOfNotEnrolledEC();
