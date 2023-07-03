@@ -33,7 +33,11 @@
           "200": {
             "description": "Operation executed successfully.",
             "content": {
-              "application/json": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrolledCreditorInstitutions"
+                }
+              }
             }
           },
           "429": {
@@ -44,6 +48,32 @@
             "content": {
               "application/json": {}
             }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EnrolledCreditorInstitutions": {
+        "type": "object",
+        "properties": {
+          "creditor_institutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnrolledCreditorInstitution"
+            }
+          }
+        }
+      },
+      "EnrolledCreditorInstitution": {
+        "type": "object",
+        "properties": {
+          "organization_fiscal_code": {
+            "type": "string"
+          },
+          "segregation_codes": {
+            "type": "string"
           }
         }
       }
