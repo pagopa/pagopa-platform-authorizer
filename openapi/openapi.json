@@ -11,6 +11,37 @@
     }
   ],
   "paths": {
+    "/api/cache-generator/domains/{domain}": {
+      "get": {
+        "tags":[
+          "Authorization analysis API"
+        ],
+        "summary": "Generating authorization in cache calling APIM",
+        "operationId": "createAuthorization",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "description": "The subscribing domain.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/organizations/domains/{domain}": {
       "get": {
         "tags": [
@@ -38,15 +69,6 @@
                   "$ref": "#/components/schemas/EnrolledCreditorInstitutions"
                 }
               }
-            }
-          },
-          "429": {
-            "description": "Too many requests"
-          },
-          "500": {
-            "description": "Service unavailable.",
-            "content": {
-              "application/json": {}
             }
           }
         }
@@ -97,6 +119,33 @@
             "description": "Service unavailable.",
             "content": {
               "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/info": {
+      "get": {
+        "tags": [ "Home" ],
+        "summary": "Return OK if application is started",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
