@@ -1,9 +1,21 @@
-# pagoPA Functions template
+# pagoPa Platform Authorizer
 
-Java template to create an Azure Function.
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pagopa_pagopa-platform-authorizer&metric=alert_status)](https://sonarcloud.io/dashboard?id=pagopa_pagopa-platform-authorizer)
 
-## Function examples
-There is an example of a Http Trigger function.
+Azure Function that exposes a set of API that permits to handle authorization for creditor institution and retrieve the info about their enrollment.
+
+## Api Documentation 📖
+
+See the [OpenApi 3 here.](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-platform-authorizer/main/openapi/openapi.json)
+
+- [pagoPa Platform Authorizer](#pagopa-platform-authorizer)
+  * [Api Documentation 📖](#api-documentation---)
+  * [Run locally with Docker](#run-locally-with-docker)
+    + [Test](#test)
+  * [Run locally with Maven](#run-locally-with-maven---)
+  * [Contributors 👥](#contributors---)
+    + [Mainteiners](#mainteiners)
+
 
 ---
 
@@ -27,16 +39,10 @@ There is an example of a Http Trigger function.
 ---
 
 
-## TODO
-Once cloned the repo, you should:
-- to deploy on standard Azure service:
-  - rename `deploy-pipelines-standard.yml` to `deploy-pipelines.yml`
-  - remove `helm` folder
-- to deploy on Kubernetes:
-  - rename `deploy-pipelines-aks.yml` to `deploy-pipelines.yml`
-  - customize `helm` configuration
-- configure the following GitHub action in `.github` folder: 
-  - `deploy.yml`
-  - `sonar_analysis.yml`
+## Contributors 👥
 
-Configure the SonarCloud project :point_right: [guide](https://pagopa.atlassian.net/wiki/spaces/DEVOPS/pages/147193860/SonarCloud+experimental).
+Made with ❤️ by PagoPa S.p.A.
+
+### Mainteiners
+
+See `CODEOWNERS` file
