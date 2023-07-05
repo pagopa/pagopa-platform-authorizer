@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "OpenAPI definition - Enrolled EC",
-    "version": "0.0.6"
+    "version": "0.1.0"
   },
   "servers": [
     {
@@ -13,7 +13,7 @@
   "paths": {
     "/api/cache-generator/domains/{domain}": {
       "get": {
-        "tags":[
+        "tags": [
           "Authorization analysis API"
         ],
         "summary": "Generating authorization in cache calling APIM",
@@ -127,7 +127,9 @@
     },
     "/info": {
       "get": {
-        "tags": [ "Home" ],
+        "tags": [
+          "Home"
+        ],
         "summary": "Return OK if application is started",
         "operationId": "healthCheck",
         "responses": {
