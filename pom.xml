@@ -122,6 +122,18 @@
                             <name>FUNCTIONS_EXTENSION_VERSION</name>
                             <value>~4</value>
                         </property>
+                        <property>
+                            <name>API_INFO_NAME</name>
+                            <value>pagopa-platform-authorizer</value>
+                        </property>
+                        <property>
+                            <name>API_INFO_ENVIRONMENT</name>
+                            <value>azure-fn</value>
+                        </property>
+                        <property>
+                            <name>API_INFO_VERSION</name>
+                            <value>${project.version}</value>
+                        </property>
                     </appSettings>
                     <resourceGroup>java-functions-group</resourceGroup>
                     <appServicePlanName>java-functions-app-service-plan</appServicePlanName>
