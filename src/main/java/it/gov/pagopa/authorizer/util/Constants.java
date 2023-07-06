@@ -16,12 +16,6 @@ public class Constants {
 
     public static final String APICONFIG_SELFCARE_INTEGRATION_SUBKEY_PARAMETER = "APICONFIG_SELFCARE_INTEGRATION_SUBKEY";
 
-    public static final String INFO_VERSION = "API_INFO_VERSION";
-
-    public static final String INFO_NAME = "API_INFO_NAME";
-
-    public static final String INFO_ENV = "API_INFO_ENVIRONMENT";
-
     public static final String WILDCARD_CHARACTER = "*";
 
     public static final Map<String, String> DOMAIN_TO_SERVICE_URI_MAPPING = Map.ofEntries(
