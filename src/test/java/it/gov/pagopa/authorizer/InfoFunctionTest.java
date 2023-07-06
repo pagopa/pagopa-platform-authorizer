@@ -4,6 +4,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import it.gov.pagopa.authorizer.model.AppInfo;
 import it.gov.pagopa.authorizer.util.Constants;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
@@ -13,11 +14,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,5 +59,40 @@ class InfoFunctionTest {
 
         // Checking assertions
         assertEquals(HttpStatus.OK, response.getStatus());
+    }
+
+    @SneakyThrows
+    @Test
+    void getInfoOk() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        String path = "/META-INF/maven/it.gov.pagopa.authorizer/platform-authorizer/pom.properties";
+
+
+        // Execute function
+        AppInfo response = function.getInfo(logger, path);
+
+        // Checking assertions
+        assertNotNull(response.getName());
+        assertNotNull(response.getVersion());
+        assertNotNull(response.getEnvironment());
+    }
+
+    @SneakyThrows
+    @Test
+    void getInfoKo() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        String path = "/META-INF/maven/it.gov.pagopa.authorizer/platform-authorizer/fake";
+
+        // Execute function
+        AppInfo response = function.getInfo(logger, path);
+
+        // Checking assertions
+        assertNull(response.getName());
+        assertNull(response.getVersion());
+        assertNotNull(response.getEnvironment());
     }
 }
