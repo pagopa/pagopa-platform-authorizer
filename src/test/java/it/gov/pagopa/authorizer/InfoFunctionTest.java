@@ -4,6 +4,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import it.gov.pagopa.authorizer.util.Constants;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ class InfoFunctionTest {
         doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
         doReturn(builder).when(builder).header(anyString(), anyString());
         doReturn(HttpStatus.valueOf(mockedHttpResponse.statusCode())).when(responseMock).getStatus();
+        doReturn(builder).when(builder).body(any());
         doReturn(responseMock).when(builder).build();
 
         // Execute function
