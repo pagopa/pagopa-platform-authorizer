@@ -40,7 +40,6 @@ public class CacheService {
         try {
             String domain = subkeyDomain.getDomain();
             // generating object to be sent
-            this.logger.log(Level.INFO, () -> String.format("Auth: %s", subkeyDomain));
             List<String> authorizedEntities = subkeyDomain.getAuthorizedEntities().stream()
                     .map(entity -> entity.getValues() != null ? StringUtils.join(entity.getValues(), "|") : entity.getValue())
                     .collect(Collectors.toList());
