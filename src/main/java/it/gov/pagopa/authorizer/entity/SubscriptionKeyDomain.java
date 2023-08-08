@@ -3,7 +3,11 @@ package it.gov.pagopa.authorizer.entity;
 import com.azure.spring.data.cosmos.core.mapping.Container;
 import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
 import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
@@ -16,14 +20,42 @@ import java.util.List;
 @Builder
 public class SubscriptionKeyDomain implements Serializable {
 
-    @Id
-    @GeneratedValue
-    private String id;
+  @Id
+  @GeneratedValue
+  @JsonProperty("id")
+  private String id;
 
-    @PartitionKey
-    private String domain;
+  @PartitionKey
+  @JsonProperty("domain")
+  private String domain;
 
-    private String subkey;
+  @JsonProperty("subscription_key")
+  private String subscriptionKey;
 
-    private List<String> authorization;
+  @JsonProperty("description")
+  private String description;
+
+  @JsonProperty("owner_id")
+  private String ownerId;
+
+  @JsonProperty("owner_name")
+  private String ownerName;
+
+  @JsonProperty("owner_type")
+  private String ownerType;
+
+  @JsonProperty("authorized_entities")
+  private List<AuthorizedEntity> authorizedEntities;
+
+  @JsonProperty("other_metadata")
+  private List<Metadata> otherMetadata;
+
+  @JsonProperty("inserted_at")
+  private String insertedAt;
+
+  @JsonProperty("last_forced_refresh")
+  private String lastForcedRefresh;
+
+  @JsonProperty("_ts")
+  private String lastUpdate;
 }
