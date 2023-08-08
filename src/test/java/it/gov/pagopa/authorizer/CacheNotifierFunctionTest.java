@@ -1,6 +1,7 @@
 package it.gov.pagopa.authorizer;
 
 import com.microsoft.azure.functions.*;
+import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
@@ -47,8 +48,11 @@ class CacheNotifierFunctionTest {
         SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
-                .subkey("subkey")
-                .authorization(List.of("entity1", "entity2"))
+                .subscriptionKey("subkey")
+                .authorizedEntities(List.of(
+                        AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                        AuthorizedEntity.builder().name("Second entity").value("entity2").build()
+                ))
                 .build();
         function.run(List.of(subkeyDomain), context);
 
@@ -87,8 +91,11 @@ class CacheNotifierFunctionTest {
         SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
-                .subkey("subkey")
-                .authorization(List.of("entity1", "entity2"))
+                .subscriptionKey("1")
+                .authorizedEntities(List.of(
+                        AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                        AuthorizedEntity.builder().name("Second entity").value("entity2").build()
+                ))
                 .build();
 
         // Checking assertions

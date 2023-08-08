@@ -1,5 +1,6 @@
 package it.gov.pagopa.authorizer.service;
 
+import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import it.gov.pagopa.authorizer.util.ResponseSubscriber;
@@ -65,7 +66,7 @@ class CacheServiceTest {
 
         // Mocking passed values
         SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
-        subkeyDomain.setAuthorization(List.of());
+        subkeyDomain.setAuthorizedEntities(List.of());
         String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
@@ -123,14 +124,21 @@ class CacheServiceTest {
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
-                        .subkey("1")
-                        .authorization(List.of("entity1", "entity2", "entity3"))
+                        .subscriptionKey("1")
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Second entity").value("entity2").build(),
+                                AuthorizedEntity.builder().name("Third entity").value("entity3").build()
+                        ))
                         .build(),
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
-                        .subkey("2")
-                        .authorization(List.of("entity1", "entity4"))
+                        .subscriptionKey("1")
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Composite entity").values(List.of("entity2", "sub-entity")).build()
+                        ))
                         .build()
         );
     }
