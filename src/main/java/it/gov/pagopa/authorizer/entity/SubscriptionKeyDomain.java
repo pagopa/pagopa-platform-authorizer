@@ -26,34 +26,24 @@ public class SubscriptionKeyDomain implements Serializable {
   private String id;
 
   @PartitionKey
-  @JsonProperty("domain")
   private String domain;
 
-  @JsonProperty("subscription_key")
-  private String subscriptionKey;
+  private String subkey;
 
-  @JsonProperty("description")
   private String description;
 
-  @JsonProperty("owner_id")
   private String ownerId;
 
-  @JsonProperty("owner_name")
   private String ownerName;
 
-  @JsonProperty("owner_type")
   private String ownerType;
 
-  @JsonProperty("authorized_entities")
   private List<AuthorizedEntity> authorizedEntities;
 
-  @JsonProperty("other_metadata")
   private List<Metadata> otherMetadata;
 
-  @JsonProperty("inserted_at")
   private String insertedAt;
 
-  @JsonProperty("last_forced_refresh")
   private String lastForcedRefresh;
 
   @JsonProperty("_ts")

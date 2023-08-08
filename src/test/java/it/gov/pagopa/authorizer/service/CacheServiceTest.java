@@ -124,7 +124,7 @@ class CacheServiceTest {
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
-                        .subscriptionKey("1")
+                        .subkey("1")
                         .authorizedEntities(List.of(
                                 AuthorizedEntity.builder().name("First entity").value("entity1").build(),
                                 AuthorizedEntity.builder().name("Second entity").value("entity2").build(),
@@ -134,7 +134,7 @@ class CacheServiceTest {
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
-                        .subscriptionKey("1")
+                        .subkey("1")
                         .authorizedEntities(List.of(
                                 AuthorizedEntity.builder().name("First entity").value("entity1").build(),
                                 AuthorizedEntity.builder().name("Composite entity").values(List.of("entity2", "sub-entity")).build()

@@ -15,12 +15,9 @@ import java.util.List;
 @Builder
 public class GenericPair implements Serializable {
 
-  @JsonProperty("key")
   private String key;
 
-  @JsonProperty("value")
   private String value;
 
-  @JsonProperty("values")
   private List<String> values;
 }

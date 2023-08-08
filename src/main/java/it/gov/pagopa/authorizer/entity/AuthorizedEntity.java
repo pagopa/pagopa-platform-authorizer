@@ -15,12 +15,9 @@ import java.util.List;
 @Builder
 public class AuthorizedEntity implements Serializable {
 
-  @JsonProperty("name")
   private String name;
 
-  @JsonProperty("value")
   private String value;
 
-  @JsonProperty("values")
   private List<String> values;
 }

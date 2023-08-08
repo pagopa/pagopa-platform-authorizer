@@ -48,7 +48,7 @@ class CacheNotifierFunctionTest {
         SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
-                .subscriptionKey("subkey")
+                .subkey("subkey")
                 .authorizedEntities(List.of(
                         AuthorizedEntity.builder().name("First entity").value("entity1").build(),
                         AuthorizedEntity.builder().name("Second entity").value("entity2").build()
@@ -91,7 +91,7 @@ class CacheNotifierFunctionTest {
         SubscriptionKeyDomain subkeyDomain = SubscriptionKeyDomain.builder()
                 .id("casual-uuid")
                 .domain("domain")
-                .subscriptionKey("1")
+                .subkey("1")
                 .authorizedEntities(List.of(
                         AuthorizedEntity.builder().name("First entity").value("entity1").build(),
                         AuthorizedEntity.builder().name("Second entity").value("entity2").build()

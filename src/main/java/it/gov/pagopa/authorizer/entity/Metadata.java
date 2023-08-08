@@ -15,12 +15,9 @@ import java.util.List;
 @Builder
 public class Metadata implements Serializable {
 
-  @JsonProperty("name")
   private String name;
 
-  @JsonProperty("short_key")
   private String shortKey;
 
-  @JsonProperty("content")
   private List<GenericPair> content;
 }
