@@ -60,6 +60,29 @@ class CacheServiceTest {
         assertEquals(subkeyDomainAsString, extractRequestMadeToAPIM(requestCaptor));
     }
 
+
+    @SneakyThrows
+    @Test
+    void addAuthConfigurationToAPIMAuthorizer_OK_compositeEntity() {
+
+        // Mocking passed values
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(1);
+        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1,entity2|sub-entity\"}";
+        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
+
+        // Mocking execution for service's internal component
+        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
+        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
+
+        // Execute function
+        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
+
+        // Checking assertions
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
+        assertEquals(subkeyDomainAsString, extractRequestMadeToAPIM(requestCaptor));
+    }
+
     @SneakyThrows
     @Test
     void addAuthConfigurationToAPIMAuthorizer_OK_noAuthorizationEntities() {
