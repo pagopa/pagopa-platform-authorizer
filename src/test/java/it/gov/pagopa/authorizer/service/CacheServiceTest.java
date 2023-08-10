@@ -139,6 +139,12 @@ class CacheServiceTest {
                                 AuthorizedEntity.builder().name("First entity").value("entity1").build(),
                                 AuthorizedEntity.builder().name("Composite entity").values(List.of("entity2", "sub-entity")).build()
                         ))
+                        .build(),
+                SubscriptionKeyDomain.builder()
+                        .id(UUID.randomUUID().toString())
+                        .domain(DOMAIN)
+                        .subkey("1")
+                        .authorizedEntities(List.of())
                         .build()
         );
     }
