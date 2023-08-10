@@ -4,13 +4,13 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -110,13 +110,20 @@ class CacheGeneratorFunctionTest {
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
                         .subkey("1")
-                        .authorization(List.of("entity1", "entity2", "entity3"))
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Second entity").value("entity2").build(),
+                                AuthorizedEntity.builder().name("Third entity").value("entity3").build()
+                        ))
                         .build(),
                 SubscriptionKeyDomain.builder()
                         .id(UUID.randomUUID().toString())
                         .domain(DOMAIN)
                         .subkey("2")
-                        .authorization(List.of("entity1", "entity4"))
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Composite entity").values(List.of("entity4", "sub-entity")).build()
+                        ))
                         .build()
         };
     }

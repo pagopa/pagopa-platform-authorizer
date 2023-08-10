@@ -5,6 +5,7 @@ import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
 import it.gov.pagopa.authorizer.util.Constants;
 import it.gov.pagopa.authorizer.util.Utility;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,8 +13,10 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class CacheService {
 
@@ -37,9 +40,12 @@ public class CacheService {
         try {
             String domain = subkeyDomain.getDomain();
             // generating object to be sent
+            List<String> authorizedEntities = subkeyDomain.getAuthorizedEntities().stream()
+                    .map(entity -> entity.getValues() != null ? StringUtils.join(entity.getValues(), "|") : entity.getValue())
+                    .collect(Collectors.toList());
             AuthConfiguration authConfiguration = AuthConfiguration.builder()
                     .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, domain, subkeyDomain.getSubkey()))
-                    .value(Utility.convertListToString(subkeyDomain.getAuthorization(), ","))
+                    .value(Utility.convertListToString(authorizedEntities, ","))
                     .build();
             this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. Will be added the following entities: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 

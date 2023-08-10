@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.1-1</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>

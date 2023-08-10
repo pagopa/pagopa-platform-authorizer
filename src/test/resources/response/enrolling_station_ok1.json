@@ -1,9 +1,0 @@
-{
-  "stations":
-  [
-    {
-      "station_id":"stationname",
-      "segregation_code":"05"
-    }
-  ]
-}
