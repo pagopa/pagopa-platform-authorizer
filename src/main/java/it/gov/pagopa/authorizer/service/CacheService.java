@@ -45,7 +45,8 @@ public class CacheService {
                     .collect(Collectors.toList());
             AuthConfiguration authConfiguration = AuthConfiguration.builder()
                     .key(String.format(Constants.AUTH_CONFIGURATION_KEY_FORMAT, domain, subkeyDomain.getSubkey()))
-                    .value(Utility.convertListToString(authorizedEntities, ","))
+                    .value(Utility.convertListToString(authorizedEntities, "#"))
+                    .metadata(Utility.extractMetadataAsString(subkeyDomain.getOtherMetadata()))
                     .build();
             this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. Will be added the following entities: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 

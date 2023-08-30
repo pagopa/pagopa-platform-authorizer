@@ -8,4 +8,5 @@ import lombok.*;
 public class AuthConfiguration {
     private String key;
     private String value;
+    private String metadata;
 }
