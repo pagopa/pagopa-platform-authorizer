@@ -5,6 +5,7 @@ import it.gov.pagopa.authorizer.entity.Metadata;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,17 @@ class UtilityTest {
     @Test
     void extractMetadataAsString_OK() {
         String expectedResult = "_md1=single-value;;_md2=value1,value2;;_md3=multiple-object-1:single-value;multiple-object-2:value1,value2;;";
-        List<Metadata> metadata = List.of(
+        String result = Utility.extractMetadataAsString(getMetadataList());
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    void extractMetadataAsString_KO() {
+        assertThrows(Exception.class, () -> Utility.extractMetadataAsString(null));
+    }
+
+    private static List<Metadata> getMetadataList() {
+        return List.of(
                 Metadata.builder()
                         .name("metadata-1")
                         .shortKey("_md1")
@@ -97,8 +108,5 @@ class UtilityTest {
                                         .build()))
                         .build()
         );
-
-        String result = Utility.extractMetadataAsString(metadata);
-        assertEquals(expectedResult, result);
     }
 }
