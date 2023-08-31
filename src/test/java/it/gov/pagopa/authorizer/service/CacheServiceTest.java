@@ -9,6 +9,8 @@ import it.gov.pagopa.authorizer.util.ResponseSubscriber;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.exceptions.base.MockitoException;
@@ -41,57 +43,17 @@ class CacheServiceTest {
     HttpClient httpClient;
 
     @SneakyThrows
-    @Test
-    void addAuthConfigurationToAPIMAuthorizer_OK() {
+    @ParameterizedTest
+    @CsvSource(delimiterString = "/", value = {
+            "0/{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}",
+            "1/{\"key\":\"domain_1\",\"value\":\"entity1#entity2|sub-entity\",\"metadata\":\"_o=pagoPA;;\"}",
+            "3/{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"\"}"
+    })
+    void addAuthConfigurationToAPIMAuthorizer_OK(int id, String subkeyDomainAsString) {
 
         // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
-        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}";
-        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-
-        // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
-        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
-
-        // Execute function
-        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-
-        // Checking assertions
-        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
-        assertEquals(subkeyDomainAsString, extractRequestMadeToAPIM(requestCaptor));
-    }
-
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationToAPIMAuthorizer_OK_compositeEntity() {
-
-        // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(1);
-        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2|sub-entity\",\"metadata\":\"_o=pagoPA;;\"}";
-        MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
-
-        // Mocking execution for service's internal component
-        CacheService cacheService = spy(new CacheService(logger, httpClient, AUTHORIZER_PATH));
-        doReturn(mockedHttpResponse).when(httpClient).send(any(), any());
-
-        // Execute function
-        cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-
-        // Checking assertions
-        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
-        verify(httpClient, times(1)).send(requestCaptor.capture(), any());
-        assertEquals(subkeyDomainAsString, extractRequestMadeToAPIM(requestCaptor));
-    }
-
-    @SneakyThrows
-    @Test
-    void addAuthConfigurationToAPIMAuthorizer_OK_emptyMetadata() {
-
-        // Mocking passed values
-        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(3);
-        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"\"}";
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(id);
+        //String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
         // Mocking execution for service's internal component
