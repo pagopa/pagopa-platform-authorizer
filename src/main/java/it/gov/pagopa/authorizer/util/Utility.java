@@ -1,5 +1,10 @@
 package it.gov.pagopa.authorizer.util;
 
+import it.gov.pagopa.authorizer.entity.GenericPair;
+import it.gov.pagopa.authorizer.entity.Metadata;
+import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 public class Utility {
@@ -29,5 +34,34 @@ public class Utility {
             }
         }
         return builder.toString();
+    }
+
+    public static String extractMetadataAsString(@NonNull List<Metadata> metadata) {
+        StringBuilder builder = new StringBuilder();
+        for (Metadata singleMetadata : metadata) {
+            builder.append(singleMetadata.getShortKey()).append("=");
+            List<GenericPair> content = singleMetadata.getContent();
+            if (content.size() == 1) {
+                GenericPair metadataPair = content.get(0);
+                builder.append(getMetadataValueAsString(metadataPair));
+            } else {
+                Iterator<GenericPair> it = content.iterator();
+                while (it.hasNext()) {
+                    GenericPair metadataPair = it.next();
+                    builder.append(metadataPair.getKey()).append(":");
+                    builder.append(getMetadataValueAsString(metadataPair));
+                    if (it.hasNext()) {
+                        builder.append(";");
+                    }
+                }
+            }
+            builder.append(";;");
+        }
+
+        return builder.toString();
+    }
+
+    private static String getMetadataValueAsString(GenericPair metadataPair) {
+        return metadataPair.getValues() != null ? StringUtils.join(metadataPair.getValues(), ",") : metadataPair.getValue();
     }
 }
