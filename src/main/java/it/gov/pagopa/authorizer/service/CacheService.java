@@ -48,7 +48,7 @@ public class CacheService {
                     .value(Utility.convertListToString(authorizedEntities, "#"))
                     .metadata(Utility.extractMetadataAsString(subkeyDomain.getOtherMetadata()))
                     .build();
-            this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. Will be added the following entities: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
+            this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 
             // executing the request towards APIM Authorizer's API
             String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath, addInProgress).replace("{domain}", domain);
@@ -59,6 +59,8 @@ public class CacheService {
                     .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(authConfiguration)))
                     .build();
             response = this.httpClient.send(apimRequest, HttpResponse.BodyHandlers.ofString());
+            final int statusCode = response != null ? response.statusCode() : 500;
+            logger.log(Level.INFO, () -> String.format("The execution of the record with id [%s] will end with an HTTP status code %s", subkeyDomain.getId(), statusCode));
 
         } catch (URISyntaxException | IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);

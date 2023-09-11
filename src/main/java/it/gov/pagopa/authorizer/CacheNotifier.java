@@ -34,10 +34,9 @@ public class CacheNotifier {
         HttpResponse<String> responseContent = null;
 
         for (SubscriptionKeyDomain triggeredSubkeyDomain : triggeredSubkeyDomains) {
-            responseContent = this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
+            this.getCacheService(logger).addAuthConfigurationToAPIMAuthorizer(triggeredSubkeyDomain, true);
         }
-        final int statusCode = responseContent != null ? responseContent.statusCode() : 500;
-        logger.log(Level.INFO, () -> String.format("The execution will end with an HTTP status code %s", statusCode));
+        logger.log(Level.INFO, () -> "The execution of cache generation from DB trigger is ended.");
     }
 
     public CacheService getCacheService(Logger logger) {
