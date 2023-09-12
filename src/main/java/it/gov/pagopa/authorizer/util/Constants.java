@@ -16,7 +16,16 @@ public class Constants {
 
     public static final String APICONFIG_SELFCARE_INTEGRATION_SUBKEY_PARAMETER = "APICONFIG_SELFCARE_INTEGRATION_SUBKEY";
 
+    public static final String RETRY_NUMBER_PARAMETER = "RETRY_NUMBER";
+
+    public static final int RETRY_NUMBER_PARAMETER_DEFAULT = 1;
+
+    public static final String STARTING_RETRY_DELAY_MILLIS_PARAMETER = "STARTING_RETRY_DELAY_MILLIS";
+
+    public static final int STARTING_RETRY_DELAY_MILLIS_PARAMETER_DEFAULT = 1000;
+
     public static final String WILDCARD_CHARACTER = "*";
+
 
     public static final Map<String, String> DOMAIN_TO_SERVICE_URI_MAPPING = Map.ofEntries(
             // insert here other static mapping from domain to service URI
