@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,5 +101,51 @@ class CacheNotifierFunctionTest {
 
         // Checking assertions
         assertThrows(InterruptedException.class, () -> function.run(List.of(subkeyDomain), context));
+    }
+
+
+    @SneakyThrows
+    @Test
+    void runOk_retry() {
+
+        // Mocking service creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        when(context.getLogger()).thenReturn(logger);
+        when(function.getCacheService(any())).thenReturn(cacheService);
+        when(function.getRetryNumber()).thenReturn(3);
+        when(function.getStartingRetryDelay()).thenReturn(500);
+
+        List<SubscriptionKeyDomain> subkeyDomains = List.of(
+                SubscriptionKeyDomain.builder()
+                        .id("casual-uuid1")
+                        .domain("domain")
+                        .subkey("1")
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Second entity").value("entity2").build()
+                        ))
+                        .build(),
+                SubscriptionKeyDomain.builder()
+                        .id("casual-uuid2")
+                        .domain("domain")
+                        .subkey("2")
+                        .authorizedEntities(List.of(
+                                AuthorizedEntity.builder().name("First entity").value("entity1").build(),
+                                AuthorizedEntity.builder().name("Second entity").value("entity2").build()
+                        ))
+                        .build()
+        );
+
+        // Mocking communication with APIM
+        doReturn(MockHttpResponse.builder().statusCode(200).uri(new URI("")).build())
+                .when(cacheService).addAuthConfigurationToAPIMAuthorizer(subkeyDomains.get(0), true);
+        doReturn(MockHttpResponse.builder().statusCode(503).uri(new URI("")).build())
+                .when(cacheService).addAuthConfigurationToAPIMAuthorizer(subkeyDomains.get(1), true);
+
+        // Executing function
+        function.run(subkeyDomains, context);
+
+        // Checking assertions
+        verify(cacheService, times(4)).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
     }
 }
