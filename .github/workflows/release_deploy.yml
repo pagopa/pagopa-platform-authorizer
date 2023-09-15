@@ -58,6 +58,8 @@ permissions:
   id-token: write
   actions: read
 
+env:
+  ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -89,7 +91,6 @@ jobs:
         run: |
           echo "environment=${{env.ENVIRNOMENT}}" >> $GITHUB_OUTPUT
 
-
   release:
     name: Create a New Release
     runs-on: ubuntu-latest
@@ -106,30 +107,34 @@ jobs:
           beta: ${{ inputs.beta }}
           skip_ci: ${{ inputs.beta }}
 
-  image:
+  build-and-push:
     needs: [ setup, release ]
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
+    environment: ${{ inputs.environment }}
     steps:
       - name: Build and Push
         id: semver
-        uses: pagopa/github-actions-template/ghcr-build-push@v1.4.1
+        uses: pagopa/github-actions-template/ghcr-build-push@v1.5.4
         with:
+          branch: ${{ github.ref_name}}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.version }}
 
   deploy_azure_fn:
     name: Deploy Azure function
     needs: [ setup, release, build-and-push ]
+    runs-on: ubuntu-latest
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
-    env:
-      ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
-      RESOURCE_GROUP: 'pagopa-${{ env.ENV_SHORT }}-weu-shared-rg'
-      APP_NAME: 'pagopa-${{ env.ENV_SHORT }}-weu-shared-authorizer-fn'
-      REGISTRY_IMAGE: 'ghcr.io/pagopa/pagopa-platform-authorizer:${{needs.release.outputs.version}}'
 
     steps:
+      - name: Set env variables
+        run: |
+          echo "RESOURCE_GROUP=pagopa-${{env.ENV_SHORT}}-weu-shared-rg" >> $GITHUB_ENV
+          echo "APP_NAME=pagopa-${{env.ENV_SHORT}}-weu-shared-authorizer-fn" >> $GITHUB_ENV
+          echo "REGISTRY_IMAGE=ghcr.io/pagopa/pagopa-platform-authorizer:${{needs.release.outputs.version}}" >> $GITHUB_ENV
+
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@v3
 
