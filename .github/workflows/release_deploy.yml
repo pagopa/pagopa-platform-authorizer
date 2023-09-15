@@ -1,10 +1,8 @@
-name: Release And Deploy
+name: Release And Deploy Azure Function
 
 # Controls when the workflow will run
 on:
   pull_request:
-    branches:
-      - main
     types: [ closed ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -19,36 +17,15 @@ on:
           - uat
           - prod
           - all
-      semver:
-        required: true
-        type: choice
-        description: Select the new Semantic Version
-        options:
-          - major
-          - minor
-          - patch
-          - buildNumber
-          - skip
-        default: skip
       beta:
         required: false
         type: boolean
-        description: deploy beta version
+        description: deploy beta function version on Azure
         default: false
-
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
-      semver:
-        required: true
-        type: string
-        default: skip
-      beta:
+      skip_release:
         required: false
         type: boolean
-        description: deploy beta version
+        description: skip the release. Only deploy
         default: false
 
 permissions:
@@ -58,8 +35,8 @@ permissions:
   id-token: write
   actions: read
 
-env:
-  ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
+# env:
+#  ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -161,6 +138,7 @@ jobs:
           echo "RESOURCE_GROUP=pagopa-${{env.ENV_SHORT}}-weu-shared-rg" >> $GITHUB_ENV
           echo "APP_NAME=pagopa-${{env.ENV_SHORT}}-weu-shared-authorizer-fn" >> $GITHUB_ENV
           echo "REGISTRY_IMAGE=ghcr.io/pagopa/pagopa-platform-authorizer:${{needs.release.outputs.version}}" >> $GITHUB_ENV
+          
 
       - name: 'Azure CLI script: start staging slot'
         uses: azure/CLI@v1
