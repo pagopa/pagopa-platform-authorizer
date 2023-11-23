@@ -64,6 +64,8 @@ public class CacheService {
 
         } catch (URISyntaxException | IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);
+        } catch (NullPointerException e) {
+            this.logger.log(Level.SEVERE, "An error occurred while trying to process domain subkey. ", e);
         }
         return response;
     }
