@@ -47,3 +47,4 @@ bin/
 .cache_ggshield
 *azure.properties
 **/node_modules
+**/.terraform/
