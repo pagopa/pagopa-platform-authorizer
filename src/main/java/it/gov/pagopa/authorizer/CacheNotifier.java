@@ -22,11 +22,11 @@ public class CacheNotifier {
             @CosmosDBTrigger(
                     name = "CacheNotifierTrigger",
                     databaseName = "authorizer",
-                    collectionName = "skeydomains",
-                    leaseCollectionName = "authorizer-leases",
-                    createLeaseCollectionIfNotExists = true,
+                    containerName = "skeydomains",
+                    leaseContainerName = "authorizer-leases",
+                    createLeaseContainerIfNotExists = true,
                     maxItemsPerInvocation=100,
-                    connectionStringSetting = "COSMOS_CONN_STRING"
+                    connection = "COSMOS_CONN_STRING"
             )
             List<SubscriptionKeyDomain> triggeredSubkeyDomains,
             final ExecutionContext context) throws InterruptedException {
