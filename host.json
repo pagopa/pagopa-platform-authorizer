@@ -14,7 +14,7 @@
     "logLevel": {
       "default": "None",
       "Host.Results": "Error",
-      "Function": "Error",
+      "Function": "Information",
       "Microsoft": "Information",
       "Worker": "Information",
       "Host.Aggregator": "Error",
