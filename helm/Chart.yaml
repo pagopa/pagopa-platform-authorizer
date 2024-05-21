@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopa-shared-platform-authorizer
 description: Microservice handling authorization caching for the Authorizer system
 type: application
-version: 0.98.0
-appVersion: 0.2.5-8-PAGOPA-1678-to-aks
+version: 0.99.0
+appVersion: 0.2.5-9-PAGOPA-1678-to-aks
 dependencies:
   - name: microservice-chart
     version: 2.4.0
