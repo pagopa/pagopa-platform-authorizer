@@ -14,7 +14,8 @@
     "logLevel": {
       "default": "None",
       "Host.Results": "Error",
-      "Function": "Information",
+      "Function.CacheGeneratorFunction": "Information",
+      "Function.CacheNotifierFunction": "Information",
       "Microsoft": "Information",
       "Worker": "Information",
       "Host.Aggregator": "Error",
