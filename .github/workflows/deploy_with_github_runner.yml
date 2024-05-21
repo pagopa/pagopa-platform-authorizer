@@ -13,7 +13,7 @@ on:
         type: string
 
 env:
-  APP_NAME: shared-authorizer-functions
+  APP_NAME: authorizer-functions
 
 
 permissions:

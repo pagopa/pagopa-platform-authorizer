@@ -40,7 +40,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weudev.shared.internal.dev.platform.pagopa.it"
-    path: /pagopa-shared-authorizer/(.*)
+    path: /authorizer-functions/(.*)
     servicePort: 80
   serviceAccount:
     create: false
