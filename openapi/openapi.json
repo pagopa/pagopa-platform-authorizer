@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "OpenAPI definition - Enrolled EC",
-    "version": "0.2.5-13-PAGOPA-1678-to-aks"
+    "version": "0.2.5-14-PAGOPA-1678-to-aks"
   },
   "servers": [
     {
