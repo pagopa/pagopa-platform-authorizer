@@ -40,7 +40,7 @@ microservice-chart:
   ingress:
     create: true
     host: "weuprod.shared.internal.platform.pagopa.it"
-    path: /pagopa-shared-authorizer/(.*)
+    path: /authorizer-functions/(.*)
     servicePort: 80
   serviceAccount:
     create: false
@@ -62,7 +62,7 @@ microservice-chart:
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 1
+    maxReplica: 10
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -80,11 +80,17 @@ microservice-chart:
   envConfig:
     WEBSITE_SITE_NAME: "pagopa-p-shared-authorizer" # required to show cloud role name in application insights # TODO
     FUNCTIONS_WORKER_RUNTIME: "java"
+    RETRY_NUMBER: "4"
+    STARTING_RETRY_DELAY_MILLIS: "1500"
   envFieldRef:
     APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
   envSecret:
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
+    COSMOS_CONN_STRING: 'auth-p-cosmos-connection-string'
+    REFRESH_CONFIGURATION_PATH: 'auth-p-refresh-configuration-url'
+    APICONFIG_SELFCARE_INTEGRATION_PATH: 'auth-p-apiconfig-selfcare-integration-url'
+    APICONFIG_SELFCARE_INTEGRATION_SUBKEY: 'auth-p-apiconfig-selfcare-integration-subkey'
   keyvault:
     name: "pagopa-p-shared-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
