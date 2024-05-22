@@ -22,6 +22,10 @@ locals {
   }
 }
 
+variable "location" {
+  type = string
+}
+
 variable "env" {
   type = string
 }
@@ -35,7 +39,7 @@ variable "prefix" {
   default = "pagopa"
   validation {
     condition = (
-    length(var.prefix) <= 6
+      length(var.prefix) <= 6
     )
     error_message = "Max length is 6 chars."
   }
@@ -52,5 +56,16 @@ variable "github_repository_environment" {
     protected_branches     = false
     custom_branch_policies = true
     reviewers_teams        = ["pagopa-team-core"]
+  }
+}
+
+variable "tags" {
+  type = map(any)
+  default = {
+    CreatedBy   = "Terraform"
+    Environment = "PROD"
+    Owner       = "pagoPA"
+    Source      = "https://github.com/pagopa/pagopa-platform-authorizer"
+    CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
   }
 }
