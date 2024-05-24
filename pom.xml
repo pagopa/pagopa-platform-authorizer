@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.2.5</version>
+    <version>0.2.5-17-PAGOPA-1678-to-aks</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>
@@ -13,8 +13,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <azure.functions.maven.plugin.version>1.15.0</azure.functions.maven.plugin.version>
-        <azure.functions.java.library.version>2.2.0</azure.functions.java.library.version>
+        <azure.functions.maven.plugin.version>1.26.0</azure.functions.maven.plugin.version>
+        <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
         <azure.cosmosdb.data.version>3.32.0</azure.cosmosdb.data.version>
         <functionAppName>com.microsoft.azure-20220215182005862</functionAppName>
         <resteasy.version>6.2.3.Final</resteasy.version>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
 
@@ -128,7 +128,7 @@
                     <region>westus</region>
                     <runtime>
                         <os>windows</os>
-                        <javaVersion>11</javaVersion>
+                        <javaVersion>17</javaVersion>
                     </runtime>
                 </configuration>
                 <executions>

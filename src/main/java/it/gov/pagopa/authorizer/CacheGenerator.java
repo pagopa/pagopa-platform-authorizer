@@ -27,9 +27,9 @@ public class CacheGenerator {
             @CosmosDBInput(
                     name = "SkeydomainsInput",
                     databaseName = "authorizer",
-                    collectionName = "skeydomains",
+                    containerName = "skeydomains",
                     sqlQuery = "SELECT * FROM SubscriptionKeyDomain s WHERE s.domain = {domain}",
-                    connectionStringSetting = "COSMOS_CONN_STRING"
+                    connection = "COSMOS_CONN_STRING"
             ) SubscriptionKeyDomain[] subscriptionKeyDomains,
             final ExecutionContext context) throws InterruptedException {
 
