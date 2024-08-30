@@ -45,15 +45,15 @@ class CacheServiceTest {
     @SneakyThrows
     @ParameterizedTest
     @CsvSource(delimiterString = "/", value = {
-            "0/{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}",
-            "1/{\"key\":\"domain_1\",\"value\":\"entity1#entity2|sub-entity\",\"metadata\":\"_o=pagoPA;;\"}",
+            "0/{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=not-visible-key:pagoPA;;\"}",
+            "1/{\"key\":\"domain_1\",\"value\":\"entity1#entity2|sub-entity\",\"metadata\":\"_o=not-visible-key:pagoPA;;\"}",
             "3/{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"\"}"
     })
     void addAuthConfigurationToAPIMAuthorizer_OK(int id, String subkeyDomainAsString) {
 
         // Mocking passed values
         SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(id);
-        //String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}";
+        //String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=not-visible-key:pagoPA;;\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
         // Mocking execution for service's internal component
@@ -76,7 +76,7 @@ class CacheServiceTest {
         // Mocking passed values
         SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
         subkeyDomain.setAuthorizedEntities(List.of());
-        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"\",\"metadata\":\"_o=pagoPA;;\"}";
+        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"\",\"metadata\":\"_o=not-visible-key:pagoPA;;\"}";
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
 
         // Mocking execution for service's internal component
@@ -98,7 +98,7 @@ class CacheServiceTest {
 
         // Mocking passed values
         SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
-        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=pagoPA;;\"}";
+        String subkeyDomainAsString = "{\"key\":\"domain_1\",\"value\":\"entity1#entity2#entity3\",\"metadata\":\"_o=not-visible-key:pagoPA;;\"}";
 
         // Mocking execution for service's internal component
         HttpClient realHttpClient = spy(HttpClient.newHttpClient());
