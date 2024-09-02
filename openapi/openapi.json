@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "OpenAPI definition - Enrolled EC",
-    "version": "0.2.8"
+    "version": "0.2.9"
   },
   "servers": [
     {
