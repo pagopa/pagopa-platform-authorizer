@@ -64,7 +64,7 @@ class UtilityTest {
 
     @Test
     void extractMetadataAsString_OK() {
-        String expectedResult = "_md1=single-value;;_md2=value1,value2;;_md3=multiple-object-1:single-value;multiple-object-2:value1,value2;;";
+        String expectedResult = "_md1=single-object:single-value;;_md2=single-object-with-multiple-values:value1,value2;;_md3=multiple-object-1:single-value;multiple-object-2:value1,value2;;";
         String result = Utility.extractMetadataAsString(getMetadataList());
         assertEquals(expectedResult, result);
     }

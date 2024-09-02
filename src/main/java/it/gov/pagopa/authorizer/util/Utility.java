@@ -43,6 +43,7 @@ public class Utility {
             List<GenericPair> content = singleMetadata.getContent();
             if (content.size() == 1) {
                 GenericPair metadataPair = content.get(0);
+                builder.append(metadataPair.getKey()).append(":");
                 builder.append(getMetadataValueAsString(metadataPair));
             } else {
                 Iterator<GenericPair> it = content.iterator();
