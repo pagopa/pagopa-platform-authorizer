@@ -114,5 +114,5 @@ microservice-chart:
         repository: ghcr.io/pagopa/pagopa-platform-authorizer
         tag: "0.2.3"
   create: false
-azure:
-  workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
+  azure:
+    workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
