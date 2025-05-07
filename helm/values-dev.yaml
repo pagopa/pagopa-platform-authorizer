@@ -10,14 +10,14 @@ microservice-chart:
   livenessProbe:
     httpGet:
       path: /info
-      port: 80
+      port: 8080
     initialDelaySeconds: 60
     failureThreshold: 6
     periodSeconds: 10
   readinessProbe:
     httpGet:
       path: /info
-      port: 80
+      port: 8080
     initialDelaySeconds: 60
     failureThreshold: 6
     periodSeconds: 10
