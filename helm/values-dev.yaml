@@ -36,13 +36,13 @@ microservice-chart:
   service:
     type: ClusterIP
     ports:
-      - 80 #http
+      - 8080 #http
       - 12345 #jmx-exporter
   ingress:
     create: true
     host: "weudev.shared.internal.dev.platform.pagopa.it"
     path: /authorizer-functions/(.*)
-    servicePort: 80
+    servicePort: 8080
   serviceAccount:
     create: false
     annotations: {}
