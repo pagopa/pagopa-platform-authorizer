@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "OpenAPI definition - Enrolled EC",
-    "version": "0.2.9-3-PIDM-484-update-helm-chart"
+    "version": "0.2.9-4-PIDM-484-update-helm-chart"
   },
   "servers": [
     {
