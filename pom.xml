@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.2.9</version>
+    <version>0.2.9-1-PIDM-484-update-helm-chart</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>
