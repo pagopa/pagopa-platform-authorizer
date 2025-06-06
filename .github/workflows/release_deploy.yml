@@ -1,206 +1,206 @@
-name: Release And Deploy Azure Function
+# name: Release And Deploy Azure Function
 
-# Controls when the workflow will run
-on:
-  pull_request:
-    types: [ closed ]
+# # Controls when the workflow will run
+# on:
+#   pull_request:
+#     types: [ closed ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-      environment:
-        required: true
-        type: choice
-        description: Select the Environment
-        options:
-          - dev
-          - uat
-          - prod
-          - all
-      beta:
-        required: false
-        type: boolean
-        description: deploy beta function version on Azure
-        default: false
-      skip_release:
-        required: false
-        type: boolean
-        description: skip the release. Only deploy
-        default: false
+#   # Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         required: true
+#         type: choice
+#         description: Select the Environment
+#         options:
+#           - dev
+#           - uat
+#           - prod
+#           - all
+#       beta:
+#         required: false
+#         type: boolean
+#         description: deploy beta function version on Azure
+#         default: false
+#       skip_release:
+#         required: false
+#         type: boolean
+#         description: skip the release. Only deploy
+#         default: false
 
-permissions:
-  packages: write
-  contents: write
-  issues: write
-  id-token: write
-  actions: read
+# permissions:
+#   packages: write
+#   contents: write
+#   issues: write
+#   id-token: write
+#   actions: read
 
-env:
-  ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
+# env:
+#   ENV_SHORT: ${{ (contains(github.event.inputs.environment,'dev') && 'd') || (contains(github.event.inputs.environment, 'uat') && 'u') || (contains(github.event.inputs.environment,'prod') && 'p') }}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-latest
-    outputs:
-      semver: ${{ steps.get_semver.outputs.semver }}
-      environment: ${{ steps.get_env.outputs.environment }}
-    steps:
-      - name: pull request rejected
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged != true
-        run: |
-          echo "❌ PR was closed without a merge"
-          exit 1
+# # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# jobs:
+#   setup:
+#     name: Setup
+#     runs-on: ubuntu-latest
+#     outputs:
+#       semver: ${{ steps.get_semver.outputs.semver }}
+#       environment: ${{ steps.get_env.outputs.environment }}
+#     steps:
+#       - name: pull request rejected
+#         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged != true
+#         run: |
+#           echo "❌ PR was closed without a merge"
+#           exit 1
 
-      # Set Semvar
-      - run: echo "SEMVER=patch" >> $GITHUB_ENV
+#       # Set Semvar
+#       - run: echo "SEMVER=patch" >> $GITHUB_ENV
 
-      - if: ${{ (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'breaking-change ')) }}
-        run: echo "SEMVER=major" >> $GITHUB_ENV
+#       - if: ${{ (github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'breaking-change ')) }}
+#         run: echo "SEMVER=major" >> $GITHUB_ENV
 
-      - if: ${{ inputs.environment == 'uat' }}
-        run: echo "SEMVER=minor" >> $GITHUB_ENV
+#       - if: ${{ inputs.environment == 'uat' }}
+#         run: echo "SEMVER=minor" >> $GITHUB_ENV
 
-      - if: ${{ inputs.environment == 'prod' }}
-        run: echo "SEMVER=skip" >> $GITHUB_ENV
+#       - if: ${{ inputs.environment == 'prod' }}
+#         run: echo "SEMVER=skip" >> $GITHUB_ENV
 
-      - if: ${{ github.ref_name != 'main' }}
-        run: echo "SEMVER=buildNumber" >> $GITHUB_ENV
+#       - if: ${{ github.ref_name != 'main' }}
+#         run: echo "SEMVER=buildNumber" >> $GITHUB_ENV
 
-      - if: ${{ inputs.skip_release }}
-        run: echo "SEMVER=skip" >> $GITHUB_ENV
+#       - if: ${{ inputs.skip_release }}
+#         run: echo "SEMVER=skip" >> $GITHUB_ENV
 
-      - id: get_semver
-        name: Set Output
-        run: echo "semver=${{env.SEMVER}}" >> $GITHUB_OUTPUT
+#       - id: get_semver
+#         name: Set Output
+#         run: echo "semver=${{env.SEMVER}}" >> $GITHUB_OUTPUT
 
-      # Set Environment
-      - run: echo "ENVIRNOMENT=${{ inputs.environment}}" >> $GITHUB_ENV
+#       # Set Environment
+#       - run: echo "ENVIRNOMENT=${{ inputs.environment}}" >> $GITHUB_ENV
 
-      - if: ${{ inputs.environment == null }}
-        run: echo "ENVIRNOMENT=dev" >> $GITHUB_ENV
+#       - if: ${{ inputs.environment == null }}
+#         run: echo "ENVIRNOMENT=dev" >> $GITHUB_ENV
 
-      - id: get_env
-        name: Set Output
-        run: echo "environment=${{env.ENVIRNOMENT}}" >> $GITHUB_OUTPUT
+#       - id: get_env
+#         name: Set Output
+#         run: echo "environment=${{env.ENVIRNOMENT}}" >> $GITHUB_OUTPUT
 
-  release:
-    name: Create a New Release
-    runs-on: ubuntu-latest
-    needs: [setup]
-    outputs:
-      version: ${{ steps.release.outputs.version }}
-    steps:
-      - name: Make Release
-        id: release
-        uses: pagopa/github-actions-template/maven-release@main
-        with:
-          semver: ${{ needs.setup.outputs.semver }}
-          github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
-          beta: ${{ inputs.beta }}
-          skip_ci: ${{ inputs.beta }}
+#   release:
+#     name: Create a New Release
+#     runs-on: ubuntu-latest
+#     needs: [setup]
+#     outputs:
+#       version: ${{ steps.release.outputs.version }}
+#     steps:
+#       - name: Make Release
+#         id: release
+#         uses: pagopa/github-actions-template/maven-release@main
+#         with:
+#           semver: ${{ needs.setup.outputs.semver }}
+#           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
+#           beta: ${{ inputs.beta }}
+#           skip_ci: ${{ inputs.beta }}
 
-  build-and-push:
-    needs: [ setup, release ]
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    if: ${{ inputs.semver != 'skip' }}
-    environment: ${{ inputs.environment }}
-    steps:
-      - name: Build and Push
-        id: semver
-        uses: pagopa/github-actions-template/ghcr-build-push@d91a1fd0b913c9830589be5d86cdb71c90813fae # v1.5.4
-        with:
-          branch: ${{ github.ref_name}}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.version }}
+#   build-and-push:
+#     needs: [ setup, release ]
+#     name: Build and Push Docker Image
+#     runs-on: ubuntu-latest
+#     if: ${{ inputs.semver != 'skip' }}
+#     environment: ${{ inputs.environment }}
+#     steps:
+#       - name: Build and Push
+#         id: semver
+#         uses: pagopa/github-actions-template/ghcr-build-push@d91a1fd0b913c9830589be5d86cdb71c90813fae # v1.5.4
+#         with:
+#           branch: ${{ github.ref_name}}
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           tag: ${{ needs.release.outputs.version }}
 
-  deploy_azure_fn:
-    name: Deploy Azure function
-    environment: ${{ inputs.environment }}
-    needs: [ setup, release, build-and-push ]
-    runs-on: ubuntu-latest
-    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+#   deploy_azure_fn:
+#     name: Deploy Azure function
+#     environment: ${{ inputs.environment }}
+#     needs: [ setup, release, build-and-push ]
+#     runs-on: ubuntu-latest
+#     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
 
-    steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+#     steps:
+#       - name: 'Checkout GitHub Action'
+#         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
-      - name: 'Login via Azure CLI'
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+#       - name: 'Login via Azure CLI'
+#         uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
+#         with:
+#           client-id: ${{ secrets.CLIENT_ID }}
+#           tenant-id: ${{ secrets.TENANT_ID }}
+#           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Set env variables
-        run: |
-          echo "RESOURCE_GROUP=pagopa-${{env.ENV_SHORT}}-weu-shared-rg" >> $GITHUB_ENV
-          echo "APP_NAME=pagopa-${{env.ENV_SHORT}}-weu-shared-authorizer-fn" >> $GITHUB_ENV
-          echo "REGISTRY_IMAGE=ghcr.io/pagopa/pagopa-platform-authorizer:${{needs.release.outputs.version}}" >> $GITHUB_ENV
+#       - name: Set env variables
+#         run: |
+#           echo "RESOURCE_GROUP=pagopa-${{env.ENV_SHORT}}-weu-shared-rg" >> $GITHUB_ENV
+#           echo "APP_NAME=pagopa-${{env.ENV_SHORT}}-weu-shared-authorizer-fn" >> $GITHUB_ENV
+#           echo "REGISTRY_IMAGE=ghcr.io/pagopa/pagopa-platform-authorizer:${{needs.release.outputs.version}}" >> $GITHUB_ENV
 
 
-      - name: 'Azure CLI script: start staging slot'
-        uses: azure/CLI@4db43908b9df2e7ac93c8275a8f9a448c59338dd # v1
-        if: ${{ contains(github.event.inputs.environment, 'prod') }}
-        with:
-          inlineScript: |
-            az functionapp start --name ${{ env.APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
+#       - name: 'Azure CLI script: start staging slot'
+#         uses: azure/CLI@4db43908b9df2e7ac93c8275a8f9a448c59338dd # v1
+#         if: ${{ contains(github.event.inputs.environment, 'prod') }}
+#         with:
+#           inlineScript: |
+#             az functionapp start --name ${{ env.APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
 
-      - name: 'Run Azure Functions Container Action: staging slot'
-        uses: Azure/functions-container-action@0aec6197033a72d3ca813f1aebd9391f639c2a8f # v1.2.1
-        if: ${{ contains(github.event.inputs.environment, 'prod')}}
-        with:
-          app-name: ${{ env.APP_NAME }}
-          image: ${{ env.REGISTRY_IMAGE }}
-          slot-name: staging
+#       - name: 'Run Azure Functions Container Action: staging slot'
+#         uses: Azure/functions-container-action@0aec6197033a72d3ca813f1aebd9391f639c2a8f # v1.2.1
+#         if: ${{ contains(github.event.inputs.environment, 'prod')}}
+#         with:
+#           app-name: ${{ env.APP_NAME }}
+#           image: ${{ env.REGISTRY_IMAGE }}
+#           slot-name: staging
 
-      - name: 'Deploy Approval'
-        uses: trstringer/manual-approval@662b3ddbc7685f897992051e87e1b4b58c07dc03 # v1
-        if: ${{ contains(github.event.inputs.environment, 'prod')}}
-        with:
-          secret: ${{ secrets.BOT_TOKEN_GITHUB }}
-          approvers: pagopa-team-core
-          minimum-approvals: 1
-          issue-title: "Deploying ${{ env.TAG }} to prod from staging"
-          issue-body: "Please approve or deny the deployment of version ${{ env.TAG }}."
-          exclude-workflow-initiator-as-approver: false
-          timeout-minutes: 360
+#       - name: 'Deploy Approval'
+#         uses: trstringer/manual-approval@662b3ddbc7685f897992051e87e1b4b58c07dc03 # v1
+#         if: ${{ contains(github.event.inputs.environment, 'prod')}}
+#         with:
+#           secret: ${{ secrets.BOT_TOKEN_GITHUB }}
+#           approvers: pagopa-team-core
+#           minimum-approvals: 1
+#           issue-title: "Deploying ${{ env.TAG }} to prod from staging"
+#           issue-body: "Please approve or deny the deployment of version ${{ env.TAG }}."
+#           exclude-workflow-initiator-as-approver: false
+#           timeout-minutes: 360
 
-      - name: 'Run Azure Functions Container Action'
-        uses: Azure/functions-container-action@0aec6197033a72d3ca813f1aebd9391f639c2a8f # v1.2.1
-        with:
-          app-name: ${{ env.APP_NAME }}
-          image: ${{ env.REGISTRY_IMAGE }}
-          slot-name: production
+#       - name: 'Run Azure Functions Container Action'
+#         uses: Azure/functions-container-action@0aec6197033a72d3ca813f1aebd9391f639c2a8f # v1.2.1
+#         with:
+#           app-name: ${{ env.APP_NAME }}
+#           image: ${{ env.REGISTRY_IMAGE }}
+#           slot-name: production
 
-      - name: 'Azure CLI script: end staging slot'
-        uses: azure/CLI@4db43908b9df2e7ac93c8275a8f9a448c59338dd # v1
-        if: ${{ contains(github.event.inputs.environment, 'prod') }}
-        with:
-          inlineScript: |
-            az functionapp stop --name ${{ env.APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
+#       - name: 'Azure CLI script: end staging slot'
+#         uses: azure/CLI@4db43908b9df2e7ac93c8275a8f9a448c59338dd # v1
+#         if: ${{ contains(github.event.inputs.environment, 'prod') }}
+#         with:
+#           inlineScript: |
+#             az functionapp stop --name ${{ env.APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --slot staging
 
-      - name: Azure logout
-        run: |
-          az logout
+#       - name: Azure logout
+#         run: |
+#           az logout
 
-##  notify:
-##    needs: [ deploy ]
-##    runs-on: ubuntu-latest
-##    name: Notify
-##    if: always()
-##    steps:
-##      - name: Report Status
-##        if: always()
-##        uses: ravsamhq/notify-slack-action@v2
-##        with:
-##          status: ${{ needs.deploy.result }}
-##          token: ${{ secrets.GITHUB_TOKEN }}
-##          notify_when: 'failure,skipped'
-##          notification_title: '{workflow} has {status_message}'
-##          message_format: '{emoji} <{workflow_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
-##          footer: 'Linked to Repo <{repo_url}|{repo}>'
-##        env:
-##          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+# ##  notify:
+# ##    needs: [ deploy ]
+# ##    runs-on: ubuntu-latest
+# ##    name: Notify
+# ##    if: always()
+# ##    steps:
+# ##      - name: Report Status
+# ##        if: always()
+# ##        uses: ravsamhq/notify-slack-action@v2
+# ##        with:
+# ##          status: ${{ needs.deploy.result }}
+# ##          token: ${{ secrets.GITHUB_TOKEN }}
+# ##          notify_when: 'failure,skipped'
+# ##          notification_title: '{workflow} has {status_message}'
+# ##          message_format: '{emoji} <{workflow_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
+# ##          footer: 'Linked to Repo <{repo_url}|{repo}>'
+# ##        env:
+# ##          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
