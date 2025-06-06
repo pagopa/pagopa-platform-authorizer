@@ -23,7 +23,7 @@ microservice-chart:
     periodSeconds: 10
   deployment:
     create: true
-    replicas: 1
+    replicas: 3
   serviceMonitor:
     create: true
     endpoints:
@@ -31,12 +31,12 @@ microservice-chart:
         targetPort: 12345
         path: /metrics
   ports:
-    - 8080 #http
+    - 8080
     - 12345 #jmx-exporter
   service:
     type: ClusterIP
     ports:
-      - 8080 #http
+      - 8080
       - 12345 #jmx-exporter
   ingress:
     create: true
@@ -62,7 +62,7 @@ microservice-chart:
       cpu: "0.5"
   autoscaling:
     enable: true
-    minReplica: 1
+    minReplica: 3
     maxReplica: 10
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds

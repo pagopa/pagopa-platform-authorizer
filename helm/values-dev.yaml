@@ -31,12 +31,12 @@ microservice-chart:
         targetPort: 12345
         path: /metrics
   ports:
-    - 80 #http
+    - 8080
     - 12345 #jmx-exporter
   service:
     type: ClusterIP
     ports:
-      - 8080 #http
+      - 8080
       - 12345 #jmx-exporter
   ingress:
     create: true
