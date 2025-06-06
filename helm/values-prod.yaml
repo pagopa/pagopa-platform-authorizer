@@ -55,15 +55,15 @@ microservice-chart:
     allowPrivilegeEscalation: false
   resources:
     requests:
-      memory: "512Mi"
+      memory: "1Gi"
       cpu: "0.25"
     limits:
-      memory: "756Mi"
+      memory: "2Gi" # https://pagopa.atlassian.net/browse/PIDM-545
       cpu: "0.5"
   autoscaling:
     enable: true
     minReplica: 3
-    maxReplica: 10
+    maxReplica: 6
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -72,11 +72,11 @@ microservice-chart:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
-      - type: memory
-        metadata:
-          # Required
-          type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-          value: "75"
+      # - type: memory
+      #   metadata:
+      #     # Required
+      #     type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+      #     value: "75"
   fileConfig: {}
   envConfig:
     WEBSITE_SITE_NAME: "pagopa-p-shared-authorizer" # required to show cloud role name in application insights # TODO
