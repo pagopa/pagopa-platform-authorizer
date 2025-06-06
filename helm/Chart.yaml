@@ -2,9 +2,9 @@ apiVersion: v2
 name: pagopa-shared-platform-authorizer
 description: Microservice handling authorization caching for the Authorizer system
 type: application
-version: 0.113.0
-appVersion: 0.2.9
+version: 0.122.0
+appVersion: 0.2.9-9-PIDM-484-update-helm-chart
 dependencies:
   - name: microservice-chart
-    version: 2.8.0
+    version: 7.5.0
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
