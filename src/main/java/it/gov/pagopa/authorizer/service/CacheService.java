@@ -1,5 +1,6 @@
 package it.gov.pagopa.authorizer.service;
 
+import com.azure.cosmos.models.FeedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
@@ -13,6 +14,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

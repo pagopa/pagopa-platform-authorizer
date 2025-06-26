@@ -1,14 +1,18 @@
 package it.gov.pagopa.authorizer;
 
+import com.azure.cosmos.models.FeedResponse;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
+import it.gov.pagopa.authorizer.client.AuthCosmosClient;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.Constants;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,23 +28,27 @@ public class CacheGenerator {
                     methods = {HttpMethod.GET},
                     route = "api/cache-generator/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
-            @CosmosDBInput(
-                    name = "SkeydomainsInput",
-                    databaseName = "authorizer",
-                    containerName = "skeydomains",
-                    sqlQuery = "SELECT * FROM SubscriptionKeyDomain s WHERE s.domain = {domain}",
-                    connection = "COSMOS_CONN_STRING"
-            ) SubscriptionKeyDomain[] subscriptionKeyDomains,
+            @BindingName("domain") String domain,
             final ExecutionContext context) throws InterruptedException {
 
         Logger logger = context.getLogger();
-        logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) related to the requested domain.", request.getUri().getPath(), subscriptionKeyDomains.length));
+        AuthCosmosClient authCosmosClient = getAuthCosmosClient();
         CacheService cacheService = getCacheService(logger);
-        for (SubscriptionKeyDomain subkeyDomain : subscriptionKeyDomains) {
-            HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-            final int statusCode = response != null ? response.statusCode() : 500;
-            logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
-        }
+
+        String continuationToken = null;
+        do {
+            Iterable<FeedResponse<SubscriptionKeyDomain>> feedResponseIterable =
+                    authCosmosClient.getSubkeyDomainPage(domain, continuationToken, 100);
+            for (FeedResponse<SubscriptionKeyDomain> page : feedResponseIterable) {
+                logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) in this page related to the requested domain.", request.getUri().getPath(), page.getResults().size()));
+                for(SubscriptionKeyDomain subkeyDomain: page.getResults()) {
+                    HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
+                    final int statusCode = response != null ? response.statusCode() : 500;
+                    logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
+                }
+                continuationToken = page.getContinuationToken();
+            }
+        } while (continuationToken != null);
 
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
@@ -54,5 +62,9 @@ public class CacheGenerator {
         HttpClient httpClient = HttpClient.newHttpClient();
         logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         return new CacheService(logger, httpClient, authorizerPath);
+    }
+
+    public AuthCosmosClient getAuthCosmosClient() {
+        return AuthCosmosClient.getInstance();
     }
 }
