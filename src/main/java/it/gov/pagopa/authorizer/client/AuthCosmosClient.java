@@ -14,6 +14,7 @@ public class AuthCosmosClient {
 
     private final String databaseId = System.getenv("COSMOS_AUTH_DB_NAME");
     private final String containerId = System.getenv("COSMOS_AUTH_CONTAINER_NAME");
+    private final int COSMOS_PAGE_SIZE = Integer.parseInt(System.getenv("COSMOS_PAGE_SIZE"));
 
     private final CosmosClient cosmosClient;
 
@@ -38,7 +39,7 @@ public class AuthCosmosClient {
         return instance;
     }
 
-    public Iterable<FeedResponse<SubscriptionKeyDomain>> getSubkeyDomainPage(String domain, String continuationToken, Integer pageSize) {
+    public Iterable<FeedResponse<SubscriptionKeyDomain>> getSubkeyDomainPage(String domain, String continuationToken) {
         CosmosDatabase cosmosDatabase = this.cosmosClient.getDatabase(databaseId);
         CosmosContainer cosmosContainer = cosmosDatabase.getContainer(containerId);
 
@@ -49,7 +50,7 @@ public class AuthCosmosClient {
         //Query the container
         Iterable<FeedResponse<SubscriptionKeyDomain>> iterables = cosmosContainer
                 .queryItems(query, new CosmosQueryRequestOptions(), SubscriptionKeyDomain.class)
-                .iterableByPage(continuationToken, pageSize);
+                .iterableByPage(continuationToken, COSMOS_PAGE_SIZE);
 
         return iterables;
     }

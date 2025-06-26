@@ -61,7 +61,7 @@ class CacheGeneratorFunctionTest {
         when(feedResponse.getContinuationToken()).thenReturn(null);
         when(feedResponse.getResults()).thenReturn(subscriptionKeyDomains);
         doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
-                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class), anyInt());
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
         doReturn(authCosmosClient).when(function).getAuthCosmosClient();
 
 
@@ -102,7 +102,7 @@ class CacheGeneratorFunctionTest {
         doReturn(authCosmosClient).when(function).getAuthCosmosClient();
         doReturn(subscriptionKeyDomains).when(feedResponse).getResults();
         doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
-                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class), anyInt());
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
 
         // Mocking communication with APIM
         doReturn(null).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());

@@ -38,13 +38,13 @@ public class CacheGenerator {
         String continuationToken = null;
         do {
             Iterable<FeedResponse<SubscriptionKeyDomain>> feedResponseIterable =
-                    authCosmosClient.getSubkeyDomainPage(domain, continuationToken, 100);
+                    authCosmosClient.getSubkeyDomainPage(domain, continuationToken);
             for (FeedResponse<SubscriptionKeyDomain> page : feedResponseIterable) {
                 logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) in this page related to the requested domain.", request.getUri().getPath(), page.getResults().size()));
                 for(SubscriptionKeyDomain subkeyDomain: page.getResults()) {
                     HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
                     final int statusCode = response != null ? response.statusCode() : 500;
-                    logger.log(Level.INFO, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
+                    logger.log(Level.FINE, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
                 }
                 continuationToken = page.getContinuationToken();
             }

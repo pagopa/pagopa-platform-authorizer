@@ -1,6 +1,5 @@
 package it.gov.pagopa.authorizer.service;
 
-import com.azure.cosmos.models.FeedResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
@@ -14,7 +13,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,11 +48,11 @@ public class CacheService {
                     .value(Utility.convertListToString(authorizedEntities, "#"))
                     .metadata(Utility.extractMetadataAsString(subkeyDomain.getOtherMetadata()))
                     .build();
-            this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
+            this.logger.log(Level.FINE, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 
             // executing the request towards APIM Authorizer's API
             String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath, addInProgress).replace("{domain}", domain);
-            this.logger.log(Level.INFO, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
+            this.logger.log(Level.FINE, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
             HttpRequest apimRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)
