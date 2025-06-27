@@ -3,10 +3,10 @@ package it.gov.pagopa.authorizer;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.service.AuthorizerConfigClientRetryWrapper;
 import it.gov.pagopa.authorizer.service.CacheService;
-import it.gov.pagopa.authorizer.util.Constants;
+import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
 
-import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.util.Calendar;
 import java.util.Optional;
@@ -14,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CacheGenerator {
-
-    private final String authorizerPath = System.getenv(Constants.REFRESH_CONFIG_PATH_PARAMETER);
 
     @FunctionName("CacheGeneratorFunction")
     public HttpResponseMessage run (
@@ -51,8 +49,8 @@ public class CacheGenerator {
 
     public CacheService getCacheService(Logger logger) {
         long start = Calendar.getInstance().getTimeInMillis();
-        HttpClient httpClient = HttpClient.newHttpClient();
+        AuthorizerConfigClientRetryWrapper authorizerConfigClientRetryWrapper = new AuthorizerConfigClientRetryWrapperImpl();
         logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
-        return new CacheService(logger, httpClient, authorizerPath);
+        return new CacheService(logger, authorizerConfigClientRetryWrapper);
     }
 }
