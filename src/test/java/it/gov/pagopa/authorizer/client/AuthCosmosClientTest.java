@@ -15,9 +15,19 @@ import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariables;
 
 class AuthCosmosClientTest {
 
+    @Test
+    void testSingletonConnectionError() throws Exception {
+        String mockKey = "mockKeymockKeymockKeymockKeymockKeymockKeymockKeymockKeymockKeymockKeymockKeymockKeyMK==";
+        withEnvironmentVariables(
+                "COSMOS_AUTH_KEY", mockKey,
+                "COSMOS_AUTH_ENDPOINT", ""
+        ).execute(() -> Assertions.assertThrows(IllegalArgumentException.class, AuthCosmosClient::getInstance)
+        );
+    }
 
     @Test
     void runOk() {
