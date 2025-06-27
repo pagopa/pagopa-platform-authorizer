@@ -1,9 +1,12 @@
 package it.gov.pagopa.authorizer;
 
+import com.azure.cosmos.models.FeedResponse;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import it.gov.pagopa.authorizer.client.AuthCosmosClient;
 import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.service.CacheService;
@@ -12,13 +15,14 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class CacheGeneratorFunctionTest {
 
     private static final String DOMAIN = "domain";
@@ -37,17 +42,28 @@ class CacheGeneratorFunctionTest {
     CacheService cacheService;
 
     @Mock
+    AuthCosmosClient authCosmosClient;
+
+    @Mock
     ExecutionContext context;
 
     @SneakyThrows
     @Test
     void runOk() {
 
-        // Mocking service creation
+        // Mocking service and client creation
         Logger logger = Logger.getLogger("example-test-logger");
-        SubscriptionKeyDomain[] retrievedSubscriptionKeyDomains = getSubscriptionKeyDomains();
+        List<SubscriptionKeyDomain> subscriptionKeyDomains = List.of(getSubscriptionKeyDomains());
+        FeedResponse<SubscriptionKeyDomain> feedResponse = mock(FeedResponse.class);
+
         when(context.getLogger()).thenReturn(logger);
         when(function.getCacheService(logger)).thenReturn(cacheService);
+        when(feedResponse.getContinuationToken()).thenReturn(null);
+        when(feedResponse.getResults()).thenReturn(subscriptionKeyDomains);
+        doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
+        doReturn(authCosmosClient).when(function).getAuthCosmosClient();
+
 
         // Mocking communication with APIM
         MockHttpResponse mockedHttpResponse = MockHttpResponse.builder().statusCode(200).uri(new URI("")).build();
@@ -66,7 +82,7 @@ class CacheGeneratorFunctionTest {
         doReturn(responseMock).when(builder).build();
 
         // Execute function
-        HttpResponseMessage response = function.run(request, retrievedSubscriptionKeyDomains, context);
+        HttpResponseMessage response = function.run(request, DOMAIN, context);
 
         // Checking assertions
         assertEquals(HttpStatus.OK, response.getStatus());
@@ -76,11 +92,17 @@ class CacheGeneratorFunctionTest {
     @Test
     void runOk_nullResponse() {
 
-        // Mocking service creation
+        // Mocking service and client creation
         Logger logger = Logger.getLogger("example-test-logger");
-        SubscriptionKeyDomain[] retrievedSubscriptionKeyDomains = getSubscriptionKeyDomains();
+        List<SubscriptionKeyDomain> subscriptionKeyDomains = List.of(getSubscriptionKeyDomains());
+        FeedResponse feedResponse = mock(FeedResponse.class);
+
         when(context.getLogger()).thenReturn(logger);
         when(function.getCacheService(logger)).thenReturn(cacheService);
+        doReturn(authCosmosClient).when(function).getAuthCosmosClient();
+        doReturn(subscriptionKeyDomains).when(feedResponse).getResults();
+        doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
 
         // Mocking communication with APIM
         doReturn(null).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
@@ -98,7 +120,7 @@ class CacheGeneratorFunctionTest {
         doReturn(responseMock).when(builder).build();
 
         // Execute function
-        HttpResponseMessage response = function.run(request, retrievedSubscriptionKeyDomains, context);
+        HttpResponseMessage response = function.run(request, DOMAIN, context);
 
         // Checking assertions
         assertEquals(HttpStatus.OK, response.getStatus());

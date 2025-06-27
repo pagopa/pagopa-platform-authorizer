@@ -48,11 +48,11 @@ public class CacheService {
                     .value(Utility.convertListToString(authorizedEntities, "#"))
                     .metadata(Utility.extractMetadataAsString(subkeyDomain.getOtherMetadata()))
                     .build();
-            this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
+            this.logger.log(Level.FINE, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 
             // executing the request towards APIM Authorizer's API
             String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath, addInProgress).replace("{domain}", domain);
-            this.logger.log(Level.INFO, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
+            this.logger.log(Level.FINE, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
             HttpRequest apimRequest = HttpRequest.newBuilder()
                     .uri(new URI(refactoredAuthorizerPath))
                     .version(HttpClient.Version.HTTP_2)

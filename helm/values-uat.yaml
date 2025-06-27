@@ -84,6 +84,10 @@ microservice-chart:
     RETRY_NUMBER: "4"
     STARTING_RETRY_DELAY_MILLIS: "1500"
     ASPNETCORE_URLS: "http://*:8080"
+    COSMOS_AUTH_DB_NAME: "authorizer"
+    COSMOS_AUTH_CONTAINER_NAME: "skeydomains"
+    COSMOS_PAGE_SIZE: "100"
+    COSMOS_AUTH_ENDPOINT: "https://pagopa-u-weu-shared-auth-cosmos-account.documents.azure.com:443/"
   envFieldRef:
     APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
     APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
@@ -93,6 +97,7 @@ microservice-chart:
     REFRESH_CONFIGURATION_PATH: 'auth-u-refresh-configuration-url'
     APICONFIG_SELFCARE_INTEGRATION_PATH: 'auth-u-apiconfig-selfcare-integration-url'
     APICONFIG_SELFCARE_INTEGRATION_SUBKEY: 'auth-u-apiconfig-selfcare-integration-subkey'
+    COSMOS_AUTH_KEY: 'auth-u-cosmos-key'
   keyvault:
     name: "pagopa-u-shared-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
