@@ -25,7 +25,7 @@ public class CacheService {
         this.authorizerConfigClientRetryWrapper = authorizerConfigClientRetryWrapper;
     }
 
-    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException {
+    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws AuthorizerConfigException {
         if (subkeyDomain == null) {
             throw new IllegalArgumentException("Passed null parameter");
         }
@@ -53,7 +53,7 @@ public class CacheService {
         } catch (NullPointerException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to process domain subkey. ", e);
         } catch (AuthorizerConfigException e) {
-            //TODO add event
+            throw new AuthorizerConfigException(String.format("ALERT: [%s]", e.getMessage()), e.getStatusCode());
         }
         return response;
     }
