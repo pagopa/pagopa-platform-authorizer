@@ -3,6 +3,7 @@ package it.gov.pagopa.authorizer;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
 import it.gov.pagopa.authorizer.util.Constants;
@@ -27,7 +28,7 @@ public class CacheNotifier {
                     connection = "COSMOS_CONN_STRING"
             )
             List<SubscriptionKeyDomain> triggeredSubkeyDomains,
-            final ExecutionContext context) throws InterruptedException {
+            final ExecutionContext context) throws InterruptedException, AuthorizerConfigException {
 
         Logger logger = context.getLogger();
         List<SubscriptionKeyDomain> unprocessedSubkeyDomains = List.copyOf(triggeredSubkeyDomains);

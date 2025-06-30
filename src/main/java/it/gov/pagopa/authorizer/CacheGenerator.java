@@ -3,6 +3,7 @@ package it.gov.pagopa.authorizer;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.service.AuthorizerConfigClientRetryWrapper;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
@@ -29,7 +30,7 @@ public class CacheGenerator {
                     sqlQuery = "SELECT * FROM SubscriptionKeyDomain s WHERE s.domain = {domain}",
                     connection = "COSMOS_CONN_STRING"
             ) SubscriptionKeyDomain[] subscriptionKeyDomains,
-            final ExecutionContext context) throws InterruptedException {
+            final ExecutionContext context) throws InterruptedException, AuthorizerConfigException {
 
         Logger logger = context.getLogger();
         logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) related to the requested domain.", request.getUri().getPath(), subscriptionKeyDomains.length));
