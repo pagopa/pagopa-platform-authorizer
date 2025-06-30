@@ -53,7 +53,7 @@ class AuthorizerConfigClientRetryWrapperImplTest {
 
     @SneakyThrows
     @Test
-    void addAuthConfigurationToAPIMAuthorizer_OK_noAuthorizationEntities() {
+    void refreshConfigurationWithRetry_OK() {
 
         // Mocking passed values
         SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
@@ -77,6 +77,34 @@ class AuthorizerConfigClientRetryWrapperImplTest {
         // Checking assertions
         assertEquals(mockedHttpResponse.statusCode(), response.statusCode());
         assertEquals(mockedHttpResponse.uri(), response.uri());
+    }
+
+    @SneakyThrows
+    @Test
+    void refreshConfigurationWithRetry_KO() {
+
+        // Mocking passed values
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
+        subkeyDomain.setAuthorizedEntities(List.of());
+        AuthConfiguration authConfiguration = getAuthConfiguration();
+        RetryConfig config = RetryConfig.custom()
+                .maxAttempts(1)
+                .intervalFunction(IntervalFunction.ofExponentialRandomBackoff(200L, 2.0, 0.6))
+                .retryOnException(e -> (e instanceof AuthorizerConfigException authConfigException) && ReasonErrorCode.isNotAReasonErrorCode(authConfigException.getStatusCode()))
+                .build();
+        Retry retry = RetryRegistry.of(config).retry("authorizerConfigRetry");
+        AuthorizerConfigException mockAuthorizerConfigException = new AuthorizerConfigException("Test exception", 500);
+
+        // Mocking execution for service's internal component
+        AuthorizerConfigClientRetryWrapperImpl authorizerConfigClientRetryWrapper = new AuthorizerConfigClientRetryWrapperImpl(authorizerConfigClient, retry);
+        doThrow(mockAuthorizerConfigException).when(authorizerConfigClient).refreshConfiguration(any(AuthConfiguration.class), anyString(), anyBoolean());
+
+        // Checking assertions after function execute
+        AuthorizerConfigException authorizerConfigException = assertThrows(AuthorizerConfigException.class,
+                () -> authorizerConfigClientRetryWrapper.refreshConfigurationWithRetry(authConfiguration, DOMAIN, false)
+        );
+        assertEquals(mockAuthorizerConfigException.getStatusCode(), authorizerConfigException.getStatusCode());
+        assertEquals(mockAuthorizerConfigException.getMessage(), authorizerConfigException.getMessage());
     }
 
     private List<SubscriptionKeyDomain> getSubscriptionKeyDomains() {
