@@ -25,7 +25,7 @@ public class CacheService {
         this.authorizerConfigClientRetryWrapper = authorizerConfigClientRetryWrapper;
     }
 
-    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws AuthorizerConfigException {
+    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException, AuthorizerConfigException {
         if (subkeyDomain == null) {
             throw new IllegalArgumentException("Passed null parameter");
         }
