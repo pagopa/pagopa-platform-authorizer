@@ -53,7 +53,6 @@ public class CacheService {
         } catch (IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);
         } catch (AuthorizerConfigUnexpectedException | NullPointerException e) {
-            this.logger.log(Level.SEVERE, "An error occurred while trying to process domain subkey. ", e);
             throw new AuthorizerConfigUnexpectedException("ALERT: " + e.getMessage(), e.getCause());
         } catch (AuthorizerConfigException e) {
             if(!ReasonErrorCode.isNotAReasonErrorCode(e.getStatusCode())) {
