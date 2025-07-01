@@ -5,6 +5,7 @@ import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.GenericPair;
 import it.gov.pagopa.authorizer.entity.Metadata;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.exception.AuthorizerConfigUnexpectedException;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
 import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
@@ -85,6 +86,42 @@ class CacheServiceTest {
         ArgumentCaptor<AuthConfiguration> requestCaptor = ArgumentCaptor.forClass(AuthConfiguration.class);
         verify(authorizerConfigClientRetryWrapper, times(1)).refreshConfigurationWithRetry(requestCaptor.capture(), anyString(), anyBoolean());
         assertEquals(subkeyDomainAsString, new ObjectMapper().writer().writeValueAsString(requestCaptor.getValue()));
+    }
+
+    @SneakyThrows
+    @Test
+    void addAuthConfigurationToAPIMAuthorizer_KO_error() {
+
+        // Mocking passed values
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
+        subkeyDomain.setAuthorizedEntities(List.of());
+        AuthorizerConfigException authorizerConfigException = new AuthorizerConfigException("Test", 800);
+
+        // Mocking execution for service's internal component
+        CacheService cacheService = spy(new CacheService(logger, authorizerConfigClientRetryWrapper));
+        doThrow(authorizerConfigException).when(authorizerConfigClientRetryWrapper).refreshConfigurationWithRetry(any(AuthConfiguration.class), anyString(), anyBoolean());
+
+        // Execute function amd check assert
+        AuthorizerConfigUnexpectedException resultException = assertThrows(AuthorizerConfigUnexpectedException.class, () -> cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false));
+        assertTrue(resultException.getMessage().contains("ALERT:"));
+    }
+
+    @SneakyThrows
+    @Test
+    void addAuthConfigurationToAPIMAuthorizer_KO_unexpectedError() {
+
+        // Mocking passed values
+        SubscriptionKeyDomain subkeyDomain = getSubscriptionKeyDomains().get(0);
+        subkeyDomain.setAuthorizedEntities(List.of());
+        AuthorizerConfigUnexpectedException authorizerConfigUnexpectedException = new AuthorizerConfigUnexpectedException("Test", new Exception());
+
+        // Mocking execution for service's internal component
+        CacheService cacheService = spy(new CacheService(logger, authorizerConfigClientRetryWrapper));
+        doThrow(authorizerConfigUnexpectedException).when(authorizerConfigClientRetryWrapper).refreshConfigurationWithRetry(any(AuthConfiguration.class), anyString(), anyBoolean());
+
+        // Execute function amd check assert
+        AuthorizerConfigUnexpectedException resultException = assertThrows(AuthorizerConfigUnexpectedException.class, () -> cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false));
+        assertTrue(resultException.getMessage().contains("ALERT:"));
     }
 
     @SneakyThrows
