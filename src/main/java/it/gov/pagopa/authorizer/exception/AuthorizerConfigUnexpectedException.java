@@ -16,4 +16,8 @@ public class AuthorizerConfigUnexpectedException extends RuntimeException {
     public AuthorizerConfigUnexpectedException(Throwable cause) {
         super(cause);
     }
+
+    public AuthorizerConfigUnexpectedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

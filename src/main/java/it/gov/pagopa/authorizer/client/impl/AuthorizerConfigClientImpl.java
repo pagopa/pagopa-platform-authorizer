@@ -59,7 +59,7 @@ public class AuthorizerConfigClientImpl implements AuthorizerConfigClient {
         String uri = String.format(AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath, domain, addInProgress);
         String body = parseBody(authConfiguration);
 
-        this.logger.info(String.format("Trying to execute a request to the path [%s]", uri));
+        this.logger.info("Trying to execute a request to the path [{}]", uri);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uri))
                 .version(HttpClient.Version.HTTP_2)

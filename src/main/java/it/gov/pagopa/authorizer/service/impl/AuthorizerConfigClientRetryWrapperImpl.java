@@ -63,7 +63,6 @@ public class AuthorizerConfigClientRetryWrapperImpl implements AuthorizerConfigC
             CheckedFunction<AuthorizerConfigClientParams, HttpResponse<String>> function,
             AuthorizerConfigClientParams params
     ) throws AuthorizerConfigException {
-
         try {
             return function.apply(params);
         } catch (Throwable e) {

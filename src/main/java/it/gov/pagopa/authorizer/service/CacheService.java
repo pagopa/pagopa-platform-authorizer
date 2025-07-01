@@ -2,7 +2,9 @@ package it.gov.pagopa.authorizer.service;
 
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigUnexpectedException;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
+import it.gov.pagopa.authorizer.model.enumeration.ReasonErrorCode;
 import it.gov.pagopa.authorizer.util.Constants;
 import it.gov.pagopa.authorizer.util.Utility;
 import org.apache.commons.lang3.StringUtils;
@@ -50,10 +52,15 @@ public class CacheService {
 
         } catch (IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);
-        } catch (NullPointerException e) {
+        } catch (AuthorizerConfigUnexpectedException | NullPointerException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to process domain subkey. ", e);
+            throw new AuthorizerConfigUnexpectedException("ALERT: " + e.getMessage(), e.getCause());
         } catch (AuthorizerConfigException e) {
-            throw new AuthorizerConfigException(String.format("ALERT: [%s]", e.getMessage()), e.getStatusCode());
+            if(!ReasonErrorCode.isNotAReasonErrorCode(e.getStatusCode())) {
+                throw new AuthorizerConfigUnexpectedException("ALERT: " + e.getMessage(), e.getCause());
+            } else {
+                throw e;
+            }
         }
         return response;
     }
