@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-platform-authorizer
-    tag: "0.2.11"
+    tag: "0.2.11-1-PIDM-545-improve-authorizer-resilience"
     pullPolicy: Always
   # https://github.com/Azure/azure-functions-host/blob/dev/src/WebJobs.Script.WebHost/Controllers/HostController.cs
   livenessProbe:
@@ -72,11 +72,11 @@ microservice-chart:
           # Required
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
-      # - type: memory
-      #   metadata:
-      #     # Required
-      #     type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
-      #     value: "75"
+          # - type: memory
+          #   metadata:
+          #     # Required
+          #     type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
+          #     value: "75"
   fileConfig: {}
   envConfig:
     WEBSITE_SITE_NAME: "pagopa-p-shared-authorizer" # required to show cloud role name in application insights # TODO
@@ -84,6 +84,10 @@ microservice-chart:
     RETRY_NUMBER: "4"
     STARTING_RETRY_DELAY_MILLIS: "1500"
     ASPNETCORE_URLS: "http://*:8080"
+    AUTHORIZER_CONFIG_INITIAL_INTERVAL: "200"
+    AUTHORIZER_CONFIG_MULTIPLIER: "2.0"
+    AUTHORIZER_CONFIG_RANDOMIZATION_FACTOR: "0.6"
+    AUTHORIZER_CONFIG_MAX_RETRIES: "3"
     COSMOS_AUTH_DB_NAME: "authorizer"
     COSMOS_AUTH_CONTAINER_NAME: "skeydomains"
     COSMOS_PAGE_SIZE: "100"

@@ -5,14 +5,14 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.2.11</version>
+    <version>0.2.11-1-PIDM-545-improve-authorizer-resilience</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <azure.functions.maven.plugin.version>1.26.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
         <azure.cosmosdb.data.version>3.32.0</azure.cosmosdb.data.version>
@@ -94,6 +94,12 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
         <dependency>
