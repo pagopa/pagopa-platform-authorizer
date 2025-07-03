@@ -7,6 +7,7 @@ import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.FeedResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
+import it.gov.pagopa.authorizer.client.impl.AuthCosmosClientImpl;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class AuthCosmosClientTest {
         withEnvironmentVariables(
                 "COSMOS_AUTH_KEY", mockKey,
                 "COSMOS_AUTH_ENDPOINT", ""
-        ).execute(() -> Assertions.assertThrows(IllegalArgumentException.class, AuthCosmosClient::getInstance)
+        ).execute(() -> Assertions.assertThrows(IllegalArgumentException.class, AuthCosmosClientImpl::getInstance)
         );
     }
 
@@ -52,7 +53,7 @@ class AuthCosmosClientTest {
         when(mockDatabase.getContainer(any())).thenReturn(mockContainer);
         when(mockClient.getDatabase(any())).thenReturn(mockDatabase);
 
-        AuthCosmosClient client = new AuthCosmosClient(mockClient);
+        AuthCosmosClient client = new AuthCosmosClientImpl(mockClient);
 
         Assertions.assertDoesNotThrow(() -> client.getSubkeyDomainPage(domain, null));
     }

@@ -4,6 +4,7 @@ import com.azure.cosmos.models.FeedResponse;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.client.AuthCosmosClient;
+import it.gov.pagopa.authorizer.client.impl.AuthCosmosClientImpl;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.service.AuthorizerConfigClientRetryWrapper;
@@ -11,9 +12,7 @@ import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
 
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +27,7 @@ public class CacheGenerator {
                     route = "api/cache-generator/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             @BindingName("domain") String domain,
-            final ExecutionContext context) throws InterruptedException {
+            final ExecutionContext context) throws InterruptedException, AuthorizerConfigException {
 
         Logger logger = context.getLogger();
         AuthCosmosClient authCosmosClient = getAuthCosmosClient();
@@ -64,6 +63,6 @@ public class CacheGenerator {
     }
 
     public AuthCosmosClient getAuthCosmosClient() {
-        return AuthCosmosClient.getInstance();
+        return AuthCosmosClientImpl.getInstance();
     }
 }
