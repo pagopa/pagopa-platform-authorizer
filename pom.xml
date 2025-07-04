@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.2.14</version>
+    <version>0.2.14-2-PIDM-759</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.14.2</version>
+            <version>2.15.0</version>
         </dependency>
 
         <dependency>

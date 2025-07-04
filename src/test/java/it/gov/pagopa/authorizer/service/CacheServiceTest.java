@@ -141,7 +141,8 @@ class CacheServiceTest {
 
         // Checking assertions
         ArgumentCaptor<AuthConfiguration> requestCaptor = ArgumentCaptor.forClass(AuthConfiguration.class);
-        verify(realAuthorizerConfigClientRetryWrapperImpl, times(1)).refreshConfigurationWithRetry(requestCaptor.capture(), anyString(), anyBoolean());        assertEquals(subkeyDomainAsString, new ObjectMapper().writer().writeValueAsString(requestCaptor.getValue()));
+        verify(realAuthorizerConfigClientRetryWrapperImpl, times(1)).refreshConfigurationWithRetry(requestCaptor.capture(), anyString(), anyBoolean());
+        assertEquals(subkeyDomainAsString, new ObjectMapper().writer().writeValueAsString(requestCaptor.getValue()));
         assertEquals(subkeyDomainAsString, new ObjectMapper().writer().writeValueAsString(requestCaptor.getValue()));
     }
 
