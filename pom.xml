@@ -5,7 +5,7 @@
 
     <groupId>it.gov.pagopa.authorizer</groupId>
     <artifactId>platform-authorizer</artifactId>
-    <version>0.2.11-2-PIDM-545-batch</version>
+    <version>0.2.13</version>
     <packaging>jar</packaging>
 
     <name>Azure Authorizer cache Fn</name>

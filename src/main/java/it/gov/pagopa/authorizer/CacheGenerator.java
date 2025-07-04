@@ -60,6 +60,7 @@ public class CacheGenerator {
         AuthorizerConfigClientRetryWrapper authorizerConfigClientRetryWrapper = new AuthorizerConfigClientRetryWrapperImpl();
         logger.log(Level.INFO, () -> String.format("Generated a new stub for HTTP Client in [%d] ms", Calendar.getInstance().getTimeInMillis() - start));
         return new CacheService(logger, authorizerConfigClientRetryWrapper);
+
     }
 
     public AuthCosmosClient getAuthCosmosClient() {
