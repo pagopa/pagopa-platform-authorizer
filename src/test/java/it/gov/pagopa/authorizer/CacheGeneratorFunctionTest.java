@@ -9,6 +9,7 @@ import com.microsoft.azure.functions.HttpStatus;
 import it.gov.pagopa.authorizer.client.AuthCosmosClient;
 import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
@@ -124,6 +125,39 @@ class CacheGeneratorFunctionTest {
 
         // Checking assertions
         assertEquals(HttpStatus.OK, response.getStatus());
+    }
+
+    @SneakyThrows
+    @Test
+    void runKo_interruptedException() {
+
+        // Mocking service and client creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        List<SubscriptionKeyDomain> subscriptionKeyDomains = List.of(getSubscriptionKeyDomains());
+        FeedResponse feedResponse = mock(FeedResponse.class);
+        InterruptedException interruptedException = new InterruptedException();
+
+        when(context.getLogger()).thenReturn(logger);
+        when(function.getCacheService(logger)).thenReturn(cacheService);
+        doReturn(authCosmosClient).when(function).getAuthCosmosClient();
+        doReturn(subscriptionKeyDomains).when(feedResponse).getResults();
+        doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
+
+        // Mocking communication with APIM
+        doThrow(interruptedException).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
+
+        // Generating request, mocking the field creation
+        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
+        doReturn(new URI("")).when(request).getUri();
+
+        // Generate mock response mocking the field creation
+        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
+        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
+        doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
+        doReturn(builder).when(builder).header(anyString(), anyString());
+        doReturn(HttpStatus.valueOf(200)).when(responseMock).getStatus();
+        doReturn(responseMock).when(builder).build();
     }
 
     private SubscriptionKeyDomain[] getSubscriptionKeyDomains() {
