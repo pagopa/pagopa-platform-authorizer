@@ -6,7 +6,6 @@ import com.microsoft.azure.functions.annotation.*;
 import it.gov.pagopa.authorizer.client.AuthCosmosClient;
 import it.gov.pagopa.authorizer.client.impl.AuthCosmosClientImpl;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
-import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
 import it.gov.pagopa.authorizer.service.AuthorizerConfigClientRetryWrapper;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.service.impl.AuthorizerConfigClientRetryWrapperImpl;
@@ -27,26 +26,11 @@ public class CacheGenerator {
                     route = "api/cache-generator/domains/{domain}",
                     authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
             @BindingName("domain") String domain,
-            final ExecutionContext context) throws InterruptedException, AuthorizerConfigException {
+            final ExecutionContext context) throws Exception {
 
         Logger logger = context.getLogger();
-        AuthCosmosClient authCosmosClient = getAuthCosmosClient();
-        CacheService cacheService = getCacheService(logger);
 
-        String continuationToken = null;
-        do {
-            Iterable<FeedResponse<SubscriptionKeyDomain>> feedResponseIterable =
-                    authCosmosClient.getSubkeyDomainPage(domain, continuationToken);
-            for (FeedResponse<SubscriptionKeyDomain> page : feedResponseIterable) {
-                logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) in this page related to the requested domain.", request.getUri().getPath(), page.getResults().size()));
-                for(SubscriptionKeyDomain subkeyDomain: page.getResults()) {
-                    HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
-                    final int statusCode = response != null ? response.statusCode() : 500;
-                    logger.log(Level.FINE, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
-                }
-                continuationToken = page.getContinuationToken();
-            }
-        } while (continuationToken != null);
+        this.handlePages(logger, request, domain);
 
         HttpResponseMessage response = request.createResponseBuilder(HttpStatus.OK)
                 .header("Content-Type", "application/json")
@@ -65,5 +49,37 @@ public class CacheGenerator {
 
     public AuthCosmosClient getAuthCosmosClient() {
         return AuthCosmosClientImpl.getInstance();
+    }
+
+    public void handlePages(Logger logger, HttpRequestMessage<Optional<String>> request, String domain) throws Exception {
+        Exception exception = null;
+        String continuationToken = null;
+        AuthCosmosClient authCosmosClient = getAuthCosmosClient();
+        CacheService cacheService = getCacheService(logger);
+
+        do {
+            try {
+                Iterable<FeedResponse<SubscriptionKeyDomain>> feedResponseIterable =
+                        authCosmosClient.getSubkeyDomainPage(domain, continuationToken);
+                for (FeedResponse<SubscriptionKeyDomain> page : feedResponseIterable) {
+                    logger.log(Level.INFO, () -> String.format("Called endpoint [%s]: found [%d] element(s) in this page related to the requested domain.", request.getUri().getPath(), page.getResults().size()));
+                    for(SubscriptionKeyDomain subkeyDomain: page.getResults()) {
+                        HttpResponse<String> response = cacheService.addAuthConfigurationToAPIMAuthorizer(subkeyDomain, false);
+                        final int statusCode = response != null ? response.statusCode() : 500;
+                        logger.log(Level.FINE, () -> String.format("Requested configuration to APIM for subscription key domain with id [%s]. Response status: %d", subkeyDomain.getId(), statusCode));
+                    }
+                    continuationToken = page.getContinuationToken();
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "An error occurred while trying to elaborate subkey page.", e);
+                // In order to postpone the throw of the exception, we keep in memory the last exception
+                // and rethrow after the all pages (and all subkeys) elaboration
+                exception = e;
+            }
+        } while (continuationToken != null);
+
+        if(exception != null) {
+            throw exception;
+        }
     }
 }
