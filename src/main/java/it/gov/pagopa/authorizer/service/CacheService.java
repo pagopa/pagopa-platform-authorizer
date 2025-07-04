@@ -1,17 +1,15 @@
 package it.gov.pagopa.authorizer.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
+import it.gov.pagopa.authorizer.exception.AuthorizerConfigUnexpectedException;
 import it.gov.pagopa.authorizer.model.AuthConfiguration;
+import it.gov.pagopa.authorizer.model.enumeration.ReasonErrorCode;
 import it.gov.pagopa.authorizer.util.Constants;
 import it.gov.pagopa.authorizer.util.Utility;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,19 +18,16 @@ import java.util.stream.Collectors;
 
 public class CacheService {
 
-    private final String authorizerPath;
-
     private final Logger logger;
 
-    private final HttpClient httpClient;
+    private final AuthorizerConfigClientRetryWrapper authorizerConfigClientRetryWrapper;
 
-    public CacheService(Logger logger, HttpClient httpClient, String authorizerPath) {
+    public CacheService(Logger logger, AuthorizerConfigClientRetryWrapper authorizerConfigClientRetryWrapper) {
         this.logger = logger;
-        this.httpClient = httpClient;
-        this.authorizerPath = authorizerPath;
+        this.authorizerConfigClientRetryWrapper = authorizerConfigClientRetryWrapper;
     }
 
-    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException {
+    public HttpResponse<String> addAuthConfigurationToAPIMAuthorizer(SubscriptionKeyDomain subkeyDomain, boolean addInProgress) throws InterruptedException, AuthorizerConfigException {
         if (subkeyDomain == null) {
             throw new IllegalArgumentException("Passed null parameter");
         }
@@ -51,21 +46,20 @@ public class CacheService {
             this.logger.log(Level.INFO, () -> String.format("The record with id [%s] related to the subscription key associated to the domain [%s] has triggered the execution. The following entities will be added: [%s]", subkeyDomain.getId(), subkeyDomain.getDomain(), authConfiguration.getValue()));
 
             // executing the request towards APIM Authorizer's API
-            String refactoredAuthorizerPath = String.format(Constants.AUTH_REFRESH_CONFIGURATION_PATH_TEMPLATE, this.authorizerPath, addInProgress).replace("{domain}", domain);
-            this.logger.log(Level.INFO, () -> String.format("Trying to execute a request to the path [%s]", refactoredAuthorizerPath));
-            HttpRequest apimRequest = HttpRequest.newBuilder()
-                    .uri(new URI(refactoredAuthorizerPath))
-                    .version(HttpClient.Version.HTTP_2)
-                    .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(authConfiguration)))
-                    .build();
-            response = this.httpClient.send(apimRequest, HttpResponse.BodyHandlers.ofString());
+            response = authorizerConfigClientRetryWrapper.refreshConfigurationWithRetry(authConfiguration, domain, addInProgress);
             final int statusCode = response != null ? response.statusCode() : 500;
             logger.log(Level.INFO, () -> String.format("The execution of the record with id [%s] will end with an HTTP status code %s", subkeyDomain.getId(), statusCode));
 
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
             this.logger.log(Level.SEVERE, "An error occurred while trying to calling APIM's Authorizer API. The communication with APIM's API failed. ", e);
-        } catch (NullPointerException e) {
-            this.logger.log(Level.SEVERE, "An error occurred while trying to process domain subkey. ", e);
+        } catch (AuthorizerConfigUnexpectedException | NullPointerException e) {
+            throw new AuthorizerConfigUnexpectedException("ALERT: " + e.getMessage(), e.getCause());
+        } catch (AuthorizerConfigException e) {
+            if(!ReasonErrorCode.isNotAReasonErrorCode(e.getStatusCode())) {
+                throw new AuthorizerConfigUnexpectedException("ALERT: " + e.getMessage(), e.getCause());
+            } else {
+                throw e;
+            }
         }
         return response;
     }
