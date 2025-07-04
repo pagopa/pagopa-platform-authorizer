@@ -71,10 +71,16 @@ public class CacheGenerator {
                     continuationToken = page.getContinuationToken();
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "An error occurred while trying to elaborate subkey page.", e);
-                // In order to postpone the throw of the exception, we keep in memory the last exception
-                // and rethrow after the all pages (and all subkeys) elaboration
-                exception = e;
+                if(e instanceof InterruptedException) {
+                    logger.log(Level.SEVERE, "Interrupted!", e);
+                    // Clean up whatever needs to be handled before interrupting
+                    Thread.currentThread().interrupt();
+                } else {
+                    logger.log(Level.SEVERE, "An error occurred while trying to elaborate subkey page.", e);
+                    // In order to postpone the throw of the exception, we keep in memory the last exception
+                    // and rethrow after the all pages (and all subkeys) elaboration
+                    exception = e;
+                }
             }
         } while (continuationToken != null);
 
