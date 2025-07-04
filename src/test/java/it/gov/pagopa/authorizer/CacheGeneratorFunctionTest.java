@@ -10,11 +10,13 @@ import it.gov.pagopa.authorizer.client.AuthCosmosClient;
 import it.gov.pagopa.authorizer.entity.AuthorizedEntity;
 import it.gov.pagopa.authorizer.entity.SubscriptionKeyDomain;
 import it.gov.pagopa.authorizer.exception.AuthorizerConfigException;
+import it.gov.pagopa.authorizer.model.AuthConfiguration;
 import it.gov.pagopa.authorizer.service.CacheService;
 import it.gov.pagopa.authorizer.util.MockHttpResponse;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -158,6 +160,56 @@ class CacheGeneratorFunctionTest {
         doReturn(builder).when(builder).header(anyString(), anyString());
         doReturn(HttpStatus.valueOf(200)).when(responseMock).getStatus();
         doReturn(responseMock).when(builder).build();
+
+        // Execute function
+        HttpResponseMessage response = function.run(request, DOMAIN, context);
+
+        // Checking assertions
+        assertEquals(HttpStatus.OK, response.getStatus());
+
+    }
+
+    @SneakyThrows
+    @Test
+    void runKo_authConfigxception() {
+
+        // Mocking service and client creation
+        Logger logger = Logger.getLogger("example-test-logger");
+        List<SubscriptionKeyDomain> subscriptionKeyDomains = List.of(getSubscriptionKeyDomains());
+        FeedResponse feedResponse = mock(FeedResponse.class);
+        AuthorizerConfigException mockAuthorizerConfigException = new AuthorizerConfigException("test_message", 500);
+
+        when(context.getLogger()).thenReturn(logger);
+        when(function.getCacheService(logger)).thenReturn(cacheService);
+        doReturn(authCosmosClient).when(function).getAuthCosmosClient();
+        doReturn(subscriptionKeyDomains).when(feedResponse).getResults();
+        doReturn(Collections.singletonList(feedResponse)).when(authCosmosClient)
+                .getSubkeyDomainPage(Mockito.eq(DOMAIN), nullable(String.class));
+
+        // Mocking communication with APIM
+        doThrow(mockAuthorizerConfigException).when(cacheService).addAuthConfigurationToAPIMAuthorizer(any(), anyBoolean());
+
+        // Generating request, mocking the field creation
+        HttpRequestMessage<Optional<String>> request = mock(HttpRequestMessage.class);
+        doReturn(new URI("")).when(request).getUri();
+
+        // Generate mock response mocking the field creation
+        final HttpResponseMessage.Builder builder = mock(HttpResponseMessage.Builder.class);
+        HttpResponseMessage responseMock = mock(HttpResponseMessage.class);
+        doReturn(builder).when(request).createResponseBuilder(any(HttpStatus.class));
+        doReturn(builder).when(builder).header(anyString(), anyString());
+        doReturn(HttpStatus.valueOf(200)).when(responseMock).getStatus();
+        doReturn(responseMock).when(builder).build();
+
+        // Checking assertions after function execute
+        AuthorizerConfigException resultException = assertThrows(AuthorizerConfigException.class,
+                () -> function.run(request, DOMAIN, context)
+        );
+
+        // Checking assertions
+        assertEquals(mockAuthorizerConfigException.getStatusCode(), resultException.getStatusCode());
+        assertEquals(mockAuthorizerConfigException.getMessage(), resultException.getMessage());
+
     }
 
     private SubscriptionKeyDomain[] getSubscriptionKeyDomains() {
